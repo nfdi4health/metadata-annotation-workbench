@@ -1,0 +1,38 @@
+{
+    "resourceType": "Questionnaire",
+    "status": "draft",
+    "item": [
+        {
+            "linkId": "1",
+            "text": "Empty",
+            "type": "group",
+            "item": [
+                {
+                    "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question1",
+                            "type": "Integer"
+                        }
+                    ],
+                    "text": "Section1",
+                    "type": "group",
+                    "linkId": "1"
+                },
+                {
+                    "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question2",
+                            "type": "Integer"
+
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section2",
+                    "linkId": "1"
+                }
+            ]
+        }
+    ]
+}

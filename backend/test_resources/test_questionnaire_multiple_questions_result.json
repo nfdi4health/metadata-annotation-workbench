@@ -1,0 +1,59 @@
+{
+    "resourceType": "Questionnaire",
+    "status": "draft",
+    "item": [
+        {
+            "linkId": "1",
+            "text": "Empty",
+            "type": "group",
+            "item": [
+                {
+                    "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question1",
+                            "type": "Integer"
+                        },
+                        {
+                        "linkId": "1",
+                        "text": "Question1.2",
+                        "type": "Integer"
+                        }    
+                    ],
+                    "text": "Section1",
+                    "type": "group",
+                    "linkId": "1"
+                },
+                {
+                  "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question2",
+                            "type": "dateTime"
+                        },
+                      {
+                            "linkId": "1",
+                            "text": "Question2.2",
+                            "type": "dateTime"
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section2",
+                    "linkId": "1"
+                },
+                {
+                  "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question3",
+                            "type": "dateTime"
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section3",
+                    "linkId": "1"
+                }
+            ]
+        }
+    ]
+}

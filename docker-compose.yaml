@@ -1,0 +1,48 @@
+version: "2.2"
+services:
+  frontend:
+    # uncomment for local dev
+#    build: ./frontend
+    restart: always
+    image: gitlab.zbmed.de:5050/km/nfdi4health/bachelorthesis/frontend:${VERSION}
+
+    environment:
+      - API_PASS=http://backend:5000
+    ports:
+      - ${PORT}:80
+    links:
+      - "backend:backend"
+    depends_on:
+      - backend
+
+  backend:
+    # uncomment for local dev
+#    build: ./backend
+    restart: always
+    image: gitlab.zbmed.de:5050/km/nfdi4health/bachelorthesis/backend:${VERSION}
+    expose:
+      - "5000"
+    environment:
+      - PYTHONPATH=/workspace
+      - API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
+      - API_OLS=https://www.ebi.ac.uk/ols/api/
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - INSTRUMENTS=/var/lib/mda/instruments
+    depends_on:
+      - db
+    volumes:
+      - instruments:/var/lib/mda/instruments
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres_db
+    ports:
+      - ${PORT_DB}:${PORT_DB}
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
+  instruments:

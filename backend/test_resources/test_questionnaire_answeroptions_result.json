@@ -1,0 +1,89 @@
+{
+    "resourceType": "Questionnaire",
+    "status": "draft",
+    "item": [
+        {
+            "linkId": "10",
+            "text": "Empty",
+            "type": "group",
+            "item": [
+                {
+                    "item": [
+                        {
+                            "linkId": "1",
+                            "text": "Question1",
+                            "type": "Integer"
+                        },
+                        {
+                        "linkId": "2",
+                        "text": "Question1.2",
+                        "type": "choice",
+                        "answerOption": [
+                            {
+                                "valueString": "Yes"
+                            },
+                            {
+                                "valueString": "No"
+                            },
+                            {
+                                "valueString": "Not sure"
+                            }
+                            ]
+                        }
+                    ],
+                    "text": "Section1",
+                    "type": "group",
+                    "linkId": "3"
+                },
+                {
+                  "item": [
+                        {
+                            "linkId": "4",
+                            "text": "Question2",
+                            "type": "dateTime"
+
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section2",
+                    "linkId": "5"
+                },
+                {
+                  "item": [
+                        {
+                            "linkId": "6",
+                            "text": "Question3",
+                            "type": "open-choice",
+                            "answerOption": [
+                            {
+                                "valueString": "A"
+                            },
+                            {
+                                "valueString": "B"
+                            },
+                            {
+                                "valueString": "C"
+                            }
+                            ]
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section3",
+                    "linkId": "7"
+                },
+                {
+                  "item": [
+                        {
+                            "linkId": "8",
+                            "text": "Question4",
+                            "type": "boolean"
+                        }
+                    ],
+                    "type": "group",
+                    "text": "Section4",
+                    "linkId": "9"
+                }
+            ]
+        }
+    ]
+}
