@@ -3,6 +3,9 @@ A metadata annotation service to support standardised metadata
 annotation. The prototypical service will support researchers and data holders 
 with the FAIRification of already existing and new data collections. 
 
+This work was done as part of the NFDI4Health Consortium and is published on behalf of this Consortium (www.nfdi4health.de).
+
+
 ## Table of contents
 * [Requirements](#requirements)
 * [General info](#general-info)
