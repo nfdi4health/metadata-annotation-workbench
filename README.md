@@ -3,9 +3,6 @@ A metadata annotation service to support standardised metadata
 annotation. The prototypical service will support researchers and data holders 
 with the FAIRification of already existing and new data collections. 
 
-This work was done as part of the NFDI4Health Consortium and is published on behalf of this Consortium (www.nfdi4health.de). 
-It is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – project number 442326535.
-
 ## Table of contents
 * [Requirements](#requirements)
 * [General info](#general-info)
@@ -13,6 +10,7 @@ It is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Founda
   * [Development](#development)
   * [Production](#production)
 * [License](#license)
+* [Funding](#funding)
 
 ## Requirements
 * Docker
@@ -59,3 +57,7 @@ To stop a production build of all services:
 
 ## License
 The project is [MIT](LICENSE) licensed.
+
+## Funding
+This work was done as part of the NFDI4Health Consortium and is published on behalf of this Consortium (www.nfdi4health.de). 
+It is funded by the Deutsche Forschungsgemeinschaft (DFG, German Research Foundation) – project number 442326535.
