@@ -26,8 +26,8 @@ export default () => {
           <EuiSpacer size="m" />
           <EuiTitle>
             <h1>
-              Semantic Metadata Annotator for annotation of questionnaires, data
-              dictionaries and case report forms
+              Metadata Annotation Workbench for annotation of questionnaires,
+              data dictionaries and case report forms
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />

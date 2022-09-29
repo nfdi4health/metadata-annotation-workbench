@@ -21,8 +21,8 @@ export default () => {
   return (
     <>
       <Helmet>
-        <title>Privacy Policy - Metadata Annotation Service </title>
-        <meta name="description" content="Metadata Annotation Service" />
+        <title>Privacy Policy - Metadata Annotation Workbench </title>
+        <meta name="description" content="Metadata Annotation Workbench" />
       </Helmet>
       <EuiPanel hasShadow={true}>
         <EuiPageHeader>

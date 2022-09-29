@@ -25,8 +25,8 @@ export default () => {
       }}
     >
       <Helmet>
-        <title> Metadata Annotator</title>
-        <meta name="description" content="Metadata Annotator" />
+        <title>Metadata Annotation Workbench</title>
+        <meta name="description" content="Metadata Annotation Workbench" />
       </Helmet>
       <EuiHeaderSection grow={false}>
         <EuiHeaderSectionItem border="right">

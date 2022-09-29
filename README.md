@@ -1,5 +1,5 @@
-# Metadata Annotation Service
-A metadata annotation service to support standardised metadata 
+# Metadata Annotation Workbench
+The Metadata Annotation Workbench supports standardised metadata 
 annotation. The prototypical service will support researchers and data holders 
 with the FAIRification of already existing and new data collections. 
 

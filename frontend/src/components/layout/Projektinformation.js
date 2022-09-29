@@ -26,7 +26,7 @@ export default () => {
         <EuiFlexItem grow={9}>
           <EuiText>
             <p>
-              The semantic metadata annotation service is developed in the{" "}
+              The Metadata Annotation Workbench is developed in the{" "}
               <EuiLink href="https://www.nfdi4health.de/en/">
                 NFDI4Health
               </EuiLink>{" "}

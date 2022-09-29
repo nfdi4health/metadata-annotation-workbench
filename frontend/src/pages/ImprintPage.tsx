@@ -20,8 +20,8 @@ export default () => {
   return (
     <>
       <Helmet>
-        <title> Imprint - Metadata Annotation Service </title>
-        <meta name="description" content="Metadata Annotation Service" />
+        <title> Imprint - Metadata Annotation Workbench </title>
+        <meta name="description" content="Metadata Annotation Workbench" />
       </Helmet>
       <EuiPanel hasShadow={true}>
         <EuiPageHeader>

@@ -91,7 +91,7 @@ export default () => {
       </EuiPageHeader>
 
       <Helmet>
-        <title> MetaData Annotator </title>
+        <title> Metadata Annotation Workbench </title>
       </Helmet>
 
       <EuiFlexGroup justifyContent="spaceAround">
@@ -163,7 +163,7 @@ export default () => {
         <EuiFlexItem grow={3}>
           <EuiPanel hasShadow={true}>
             <EuiTitle>
-              <h1>MetaData Annotator</h1>
+              <h1>Metadata Annotation Workbench</h1>
             </EuiTitle>
             <EuiSpacer />
             <Projektinformation />
