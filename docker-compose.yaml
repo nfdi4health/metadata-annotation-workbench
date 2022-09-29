@@ -4,7 +4,7 @@ services:
     # uncomment for local dev
 #    build: ./frontend
     restart: always
-    image: gitlab.zbmed.de:5050/km/nfdi4health/bachelorthesis/frontend:${VERSION}
+    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
 
     environment:
       - API_PASS=http://backend:5000
@@ -19,7 +19,7 @@ services:
     # uncomment for local dev
 #    build: ./backend
     restart: always
-    image: gitlab.zbmed.de:5050/km/nfdi4health/bachelorthesis/backend:${VERSION}
+    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/backend:${VERSION}
     expose:
       - "5000"
     environment:
