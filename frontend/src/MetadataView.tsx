@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MetadataWidget } from "@km/widgets-semlookp";
+import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 
 interface TermWidgetProps {
   iri: string;
