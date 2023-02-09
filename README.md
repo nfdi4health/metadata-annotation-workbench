@@ -48,7 +48,7 @@ python -m spacy download en_core_web_sm
 #### Define environment variables and run the application
 ```
 export FLASK_APP=restapi
-export FLASK_ENV=development
+export FLASK_DEBUG=true
 export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 export API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
 export INSTRUMENTS=instruments
