@@ -39,7 +39,6 @@ cd backend
 python3 -m venv venv
 # activate environment and install python3-dev
 source ./venv/bin/activate
-apt get install python3-dev
 # install requirements
 pip3 install -r ./requirements.txt
 # download the spacy model for text processing
