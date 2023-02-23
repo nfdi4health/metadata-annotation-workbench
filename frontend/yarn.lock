@@ -1724,11 +1724,6 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@km/widgets-semlookp@^1.0.15":
-  "integrity" "sha1-y/O6H9i10GciZH9mvldDlEblKtE="
-  "resolved" "https://gitlab.zbmed.de/api/v4/projects/550/packages/npm/@km/widgets-semlookp/-/@km/widgets-semlookp-1.0.15.tgz"
-  "version" "1.0.15"
-
 "@leichtgewicht/ip-codec@^2.0.1":
   "integrity" "sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A=="
   "resolved" "https://registry.npmjs.org/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz"
@@ -1740,6 +1735,11 @@
   "version" "0.2.0"
   dependencies:
     "unist-util-visit" "^1.4.1"
+
+"@nfdi4health/semlookp-widgets@1.0.1":
+  "integrity" "sha512-5XZTyPz5ZoSlNcTNMReV8c5i3XZa4NcyPJAt3reijkoDTomHAGTE7SOOi94XfdZyyCM1XpY61tgyugjj8MldHw=="
+  "resolved" "https://npm.pkg.github.com/download/@nfdi4health/semlookp-widgets/1.0.1/7789c148c7aff4c8d507156e25c873f07324fbd3"
+  "version" "1.0.1"
 
 "@nodelib/fs.scandir@2.1.5":
   "integrity" "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="

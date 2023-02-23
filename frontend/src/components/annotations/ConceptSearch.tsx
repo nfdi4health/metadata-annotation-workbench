@@ -14,7 +14,7 @@ import {
 } from "@elastic/eui";
 import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
-import { MetadataWidget } from "@km/widgets-semlookp";
+import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 
 export default (props: {
   currentDataItem: {
