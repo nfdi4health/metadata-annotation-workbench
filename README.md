@@ -49,7 +49,9 @@ python -m spacy download en_core_web_sm
 ```
 export FLASK_APP=restapi
 export FLASK_DEBUG=true
-export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+export DB_USERNAME=postgres
+export DB_PASSWORD=postgres
+export DB_HOST=localhost
 export API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
 export INSTRUMENTS=instruments
 flask run

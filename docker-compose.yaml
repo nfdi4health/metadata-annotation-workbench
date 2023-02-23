@@ -31,7 +31,9 @@ services:
       - PYTHONPATH=/workspace
       - API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
       - API_OLS=https://www.ebi.ac.uk/ols/api/
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
       - INSTRUMENTS=/var/lib/mda/instruments
     depends_on:
       - db
