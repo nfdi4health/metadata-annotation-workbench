@@ -4,7 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DB_USERNAME = os.environ.get("DB_USERNAME")
+DB_PASSWORD = os.environ.get("DB_PASSWORD")
+DB_HOST = os.environ.get("DB_HOST")
+DATABASE_URL = "postgresql://" + DB_USERNAME + ":" +  DB_PASSWORD + "@" + DB_HOST + ":5432/" + DB_USERNAME
 engine = create_engine(DATABASE_URL)
 session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,

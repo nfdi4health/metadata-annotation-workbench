@@ -2,7 +2,7 @@ version: "2.2"
 services:
   frontend:
     # uncomment for local dev
-#    build: ./frontend
+    build: ./frontend
     restart: always
     image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
 
@@ -17,7 +17,7 @@ services:
 
   backend:
     # uncomment for local dev
-#    build: ./backend
+    build: ./backend
     restart: always
     image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/backend:${VERSION}
     expose:
@@ -26,7 +26,10 @@ services:
       - PYTHONPATH=/workspace
       - API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
       - API_OLS=https://www.ebi.ac.uk/ols/api/
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+#      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
       - INSTRUMENTS=/var/lib/mda/instruments
     depends_on:
       - db

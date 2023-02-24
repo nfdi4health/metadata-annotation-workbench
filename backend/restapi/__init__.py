@@ -27,7 +27,10 @@ def create_app(test_config=None):
 
     init_db()
 
-    DATABASE_URL = os.environ.get("DATABASE_URL")
+    DB_USERNAME = os.environ.get("DB_USERNAME")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD")
+    DB_HOST = os.environ.get("DB_HOST")
+    DATABASE_URL = "postgresql://" + DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOST + ":5432/" + DB_USERNAME
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     app.config['JSON_SORT_KEYS'] = False
     db.init_app(app)
