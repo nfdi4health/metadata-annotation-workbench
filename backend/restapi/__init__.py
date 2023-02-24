@@ -67,7 +67,10 @@ def create_app(test_config=None):
     @app.route('/api/projectNames', methods=["GET"])
     def get_projectNames():
         query = db.session.query(Instrument.name).all()
-        return jsonify(query)
+        if len(query) == 1:
+            return jsonify([query[0].name])
+        else:
+            return jsonify(query)
 
     @app.route('/api/dataItems', methods=["GET"])
     def load_dataItems():
