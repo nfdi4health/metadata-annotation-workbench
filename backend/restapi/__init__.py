@@ -37,6 +37,7 @@ def create_app(test_config=None):
 
     ols = os.environ.get('API_SEMLOOKP')
     instruments = os.environ.get('INSTRUMENTS')
+    API_PREDICT = os.environ.get('API_PREDICT')
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -173,7 +174,6 @@ def create_app(test_config=None):
         payload = {'q': quote(quote(q, safe='~()*!\''), safe='~()*!\'')}
         r = requests.get(ols + 'ontologies/terms/', params=payload)
         obj = r.json()
-        print(obj)
 
         return(obj["_embedded"]["terms"][0]["label"])
 
@@ -184,7 +184,6 @@ def create_app(test_config=None):
         payload = {'q': quote(quote(q, safe='~()*!\''), safe='~()*!\'')}
         r = requests.get(ols + 'ontologies/terms/', params=payload)
         obj = r.json()
-        print(obj)
 
         return (obj["_embedded"]["terms"][0]["label"])
 
@@ -286,5 +285,12 @@ def create_app(test_config=None):
         project_name = request.args.get('projectName', type=str)
         instrument = db.session.query(Instrument).filter_by(name=project_name).all()
         return jsonify(instrument[0].instrument_type)
+
+    @app.route('/api/prediction/predict', methods=['GET'])
+    def get_predictions():
+        variable = request.args.get('variable', type=str)
+        r = requests.get(API_PREDICT + "/predict?variable=" + variable)
+        result = r.json()["prediction"][:3]
+        return result
 
     return app

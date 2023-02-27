@@ -2,14 +2,12 @@ import { useQuery, useQueryClient } from "react-query";
 import {
     EuiCallOut,
     EuiCard,
-    EuiFieldSearch,
     EuiFlexGroup,
     EuiFlexItem,
     EuiLoadingSpinner,
     EuiPanel,
     EuiSpacer,
     EuiText,
-    EuiToolTip,
 } from "@elastic/eui";
 import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
@@ -34,30 +32,28 @@ export default (props: {
     const [viewConcept, setViewConcept] = useState();
     const [currentConcept, setCurrentConcept] = useState<OLSConceptIF>();
 
-    const queryClient = useQueryClient();
-
     const {
         isSuccess,
-        data: searchData,
-        refetch,
+        data: predictions,
         isLoading,
         isError,
     } = useQuery(
-        ["semlookp_search_search", searchValue, props.currentDataItem],
+        ["maelstrom-predictions", searchValue],
         () => {
             return fetch(
-                `/api/ols?q=${searchValue}&ontology=${props.ontologyList}`
+                `/api/prediction/predict?variable=${searchValue}`
             ).then((result) => result.json());
         }
     );
 
+
     useEffect(() => {
         if (isSuccess) {
-            if (searchData.response.docs) {
+            if (predictions.length > 0) {
                 setCurrentConcept({
-                    iri: searchData.response.docs[0]?.iri,
-                    label: searchData.response.docs[0]?.label,
-                    ontology: searchData.response.docs[0]?.ontology_name,
+                    iri: predictions[0].iri,
+                    label: predictions[0].label,
+                    ontology: "maelstrom",
                 });
             } else {
                 setCurrentConcept({
@@ -67,7 +63,7 @@ export default (props: {
                 });
             }
         }
-    }, [searchData]);
+    }, [predictions]);
 
     useEffect(() => {
         setSearchValue(props.currentDataItem.text);
@@ -75,9 +71,9 @@ export default (props: {
 
     useEffect(() => {
         if (isSuccess) {
-            setViewConcept(searchData.response.docs[0]?.iri);
+            setViewConcept(predictions[0].iri);
         }
-    }, [searchData]);
+    }, [predictions]);
 
     const viewAnnotation = (item: any) => {
         setViewConcept(item.iri);
@@ -114,8 +110,8 @@ export default (props: {
             width: "20%",
         },
         {
-            field: "ontology_name",
-            name: "Ontology",
+            field: "confidence",
+            name: "Confidence",
             width: "10%",
         },
         {
@@ -125,50 +121,16 @@ export default (props: {
         },
     ];
 
-    const onSearch = (e: any) => {
-        setSearchValue(e);
-        if (e.length > 3) {
-            queryClient.invalidateQueries("semlookp_search_search");
-            refetch();
-        }
-    };
-    const onInputChange = (e: any) => {
-        setSearchValue(e.target.value);
-    };
-
     return (
         <div>
             <EuiFlexGroup>
                 <EuiFlexItem>
                     <EuiFlexItem>
                         <EuiPanel>
-                            <EuiToolTip
-                                position="top"
-                                content={
-                                    <p>
-                                        The default free text search is across all textual fields in
-                                        the terminologies, but results are ranked towards hits in
-                                        labels, then synonyms, then definitions.
-                                    </p>
-                                }
-                            >
-                                <EuiText>
-                                    <h4>Search</h4>
-                                </EuiText>
-                            </EuiToolTip>
-
+                            <EuiText>
+                                <h4>Suggestion</h4>
+                            </EuiText>
                             <EuiSpacer size="m"/>
-                            <EuiFieldSearch
-                                placeholder={props.currentDataItem.text}
-                                value={searchValue}
-                                onChange={(e) => onInputChange(e)}
-                                onSearch={(e) => onSearch(e)}
-                                incremental
-                                isClearable
-                            />
-
-                            <EuiSpacer/>
-
                             {isLoading && <EuiLoadingSpinner size="xl"/>}
 
                             {isError && (
@@ -183,16 +145,17 @@ export default (props: {
                                     </p>
                                 </EuiCallOut>
                             )}
-
-                            {isSuccess && searchData.response.docs &&
+                            {isSuccess &&
                                 <CustomEuiTable
                                     addAnnotation={props.addAnnotation}
                                     columns={columns}
                                     actions={actions}
-                                    data={searchData.response.docs}/>
-                            }
+                                    data={predictions}/>}
                         </EuiPanel>
+
                     </EuiFlexItem>
+                    <EuiSpacer size="m"/>
+
                 </EuiFlexItem>
                 <EuiFlexItem style={{ maxWidth: "50%" }}>
                     <EuiPanel>
