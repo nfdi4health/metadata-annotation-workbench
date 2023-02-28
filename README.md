@@ -33,6 +33,11 @@ https://docs.github.com/en/packages/working-with-a-github-packages-registry/work
 ```
 docker-compose --env dev.env up db
 ```
+#### Run the Docker container with the prediction
+```
+docker-compose --env dev.env up prediction
+```
+
 #### Install the virtual environment and requirements
 ```
 cd backend
@@ -49,9 +54,12 @@ python -m spacy download en_core_web_sm
 ```
 export FLASK_APP=restapi
 export FLASK_DEBUG=true
-export DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
+export DB_USERNAME=postgres
+export DB_PASSWORD=postgres
+export DB_HOST=localhost
 export API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
 export INSTRUMENTS=instruments
+export API_PREDICT=http://172.29.0.3:5000
 flask run
 ```
 
@@ -76,7 +84,7 @@ docker-compose --env-file dev.env up
 The frontend service is available at http://localhost:8090/.
 
 To stop a production build of all services:
-` docker-compose --env-file dev.env down`
+`docker-compose --env-file dev.env down`
 
 ## License
 The project is [MIT](LICENSE) licensed.
