@@ -55,8 +55,6 @@ services:
     image: gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe
     expose:
       - "5000"
-#    ports:
-#      - 5001:5001
 
 volumes:
   db:
