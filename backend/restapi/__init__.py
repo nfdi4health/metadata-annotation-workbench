@@ -70,7 +70,7 @@ def create_app(test_config=None):
         if len(query) == 1:
             return jsonify([query[0].name])
         else:
-            return jsonify(query)
+            return jsonify([tuple(row) for row in query])
 
     @app.route('/api/dataItems', methods=["GET"])
     def load_dataItems():
