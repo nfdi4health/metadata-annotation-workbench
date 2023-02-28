@@ -113,6 +113,7 @@ export default (props: {
             field: "confidence",
             name: "Confidence",
             width: "10%",
+            description: "This confidence score shows the probability of the class being detected correctly by the algorithm and is given as a percentage."
         },
         {
             name: "",
