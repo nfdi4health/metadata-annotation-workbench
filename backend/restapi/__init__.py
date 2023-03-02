@@ -290,7 +290,7 @@ def create_app(test_config=None):
     def get_predictions():
         variable = request.args.get('variable', type=str)
         r = requests.get(API_PREDICT + "/predict?variable=" + variable)
-        result = r.json()["prediction"][:3]
+        result = r.json()["prediction"][:5]
         return result
 
     return app
