@@ -11,7 +11,7 @@ build-BE:
   script:
     - cd backend
     - docker pull $CI_REGISTRY_IMAGE/backend:latest || true
-    - docker build --cache-from $CI_REGISTRY_IMAGE/backend:latest --tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE/backend:latest .
+    - docker build --build-arg COMMIT_SHA=$CI_COMMIT_SHA --cache-from $CI_REGISTRY_IMAGE/backend:latest --tag $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE/backend:latest .
     - docker push $CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE/backend:latest
 build-FE:
@@ -27,7 +27,7 @@ build-FE:
   script:
     - cd frontend
     - docker pull $CI_REGISTRY_IMAGE/frontend:latest || true
-    - docker build --cache-from $CI_REGISTRY_IMAGE/frontend:latest --tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE/frontend:latest --build-arg NPM_TOKEN=$NPM_TOKEN_GITHUB .
+    - docker build --build-arg COMMIT_SHA=$CI_COMMIT_SHA --cache-from $CI_REGISTRY_IMAGE/frontend:latest --tag $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE/frontend:latest --build-arg NPM_TOKEN=$NPM_TOKEN_GITHUB .
     - docker push $CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE/frontend:latest
 
