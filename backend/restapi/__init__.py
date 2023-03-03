@@ -33,6 +33,7 @@ def create_app(test_config=None):
     DATABASE_URL = "postgresql://" + DB_USERNAME + ":" + DB_PASSWORD + "@" + DB_HOST + ":5432/" + DB_USERNAME
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
     app.config['JSON_SORT_KEYS'] = False
+    app.config['COMMIT_SHA'] = os.environ.get('COMMIT_SHA', default="development")
     db.init_app(app)
 
     ols = os.environ.get('API_SEMLOOKP')
@@ -275,10 +276,7 @@ def create_app(test_config=None):
     @app.route('/api/stats/', methods=['GET'])
     def stats_documents():
         json_output = {}
-        if os.environ.get('COMMIT_SHA') is None:
-            json_output["softwareVersion"] = 'development'
-        else:
-            json_output["softwareVersion"] = os.environ.get('COMMIT_SHA')
+        json_output["softwareVersion"] = app.config['COMMIT_SHA']
         return jsonify(json_output)
 
     @app.route('/api/instrumentType', methods=['GET'])
