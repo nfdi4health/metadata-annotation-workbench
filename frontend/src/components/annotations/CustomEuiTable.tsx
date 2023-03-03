@@ -22,7 +22,7 @@ export default (props: {
         // @ts-ignore
         const { index: pageIndex, size: pageSize } = page;
         setItemsPage(
-            props.data?.response.docs.slice(
+            props.data?.slice(
                 pageIndex * pageSize,
                 pageSize + pageIndex * pageSize
             )
