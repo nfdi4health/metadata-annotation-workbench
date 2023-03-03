@@ -33,6 +33,11 @@ https://docs.github.com/en/packages/working-with-a-github-packages-registry/work
 ```
 docker-compose --env dev.env up db
 ```
+#### Run the Docker container with the prediction
+```
+docker-compose --env dev.env up prediction
+```
+
 #### Install the virtual environment and requirements
 ```
 cd backend
@@ -79,7 +84,7 @@ docker-compose --env-file dev.env up
 The frontend service is available at http://localhost:8090/.
 
 To stop a production build of all services:
-` docker-compose --env-file dev.env down`
+`docker-compose --env-file dev.env down`
 
 ## License
 The project is [MIT](LICENSE) licensed.
