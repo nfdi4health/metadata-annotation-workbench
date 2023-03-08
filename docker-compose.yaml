@@ -2,7 +2,7 @@ version: "2.2"
 services:
   frontend:
     # uncomment for local dev
-    build: ./frontend
+    #build: ./frontend
     restart: always
     image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
 
@@ -17,7 +17,7 @@ services:
 
   backend:
     # uncomment for local dev
-    build: ./backend
+    #build: ./backend
     restart: always
     image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/backend:${VERSION}
     expose:
