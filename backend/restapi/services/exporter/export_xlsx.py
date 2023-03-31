@@ -14,7 +14,7 @@ def get_codes_for_linkId(linkId, codes):
 
 def get_original_xlsx_and_annotations(instrument, questions, codes, instruments):
     df = pd.read_excel(os.path.join(instruments, instrument[0].original_name))
-    df = df.reset_index()
+    # df = df.reset_index()
     for index, row in df.iterrows():
         annotation_col = instrument[0].annotation_column
         if isinstance(row[annotation_col], str):
