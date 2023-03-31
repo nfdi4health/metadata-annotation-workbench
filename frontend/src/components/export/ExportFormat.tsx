@@ -12,6 +12,7 @@ export default (props: { format: string; setFormat: Function }) => {
   const options = [
     { value: "xlsx", text: "EXCEL" },
     { value: "xlsxOpal", text: "Excel Maelstrom for OPAL" },
+    { value: "mica", text: "Excel Maelstrom for MICA" },
   ];
 
   return (

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router";
 
 export default () => {
   const { projectId } = useParams();
-  const [format, setFormat] = useState("xlsx");
+  const [format, setFormat] = useState("mica");
 
   const mutation_export_json = useMutation(() => {
     return fetch(

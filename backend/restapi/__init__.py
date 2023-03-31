@@ -12,7 +12,8 @@ from restapi.models import db
 from restapi.models.models import Item, AnswerOption, Instrument, Code
 from restapi.services.exporter.export_maelstrom import export_maelstrom
 from restapi.services.exporter.export_questionnaire import db_to_fhirJson, db_to_df
-from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations
+from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations, \
+    get_original_xlsx_and_annotations_for_mica
 from restapi.services.filter_search_results import filter_class, filter_maelstrom_domains, filter_ontology_information
 from restapi.services.importer.import_excel import single_column_to_db
 from restapi.services.importer.import_maelstrom import import_maelstrom
@@ -257,8 +258,10 @@ def create_app(test_config=None):
 
             if format == "xlsxOpal":
                 df = export_maelstrom(instrument, questions, codes, instruments)
-            elif format == "xlsx":
+            if format == "xlsx":
                 df = get_original_xlsx_and_annotations(instrument, questions, codes, instruments)
+            elif format == "mica":
+                df = get_original_xlsx_and_annotations_for_mica(instrument, questions, codes, instruments)
             else:
                 return jsonify("This format is not supported")
 
