@@ -81,7 +81,28 @@ export default (props: {
                 <EuiFlexGroup>
                     <>
                         <EuiFlexItem>
-                            {toggleIdSelected == '2' &&
+                            {props.ontologyList == "maelstrom" &&
+                                <>
+                                    {toggleIdSelected == '2' &&
+                                        <ConceptSearch
+                                            currentDataItem={{
+                                                currentDataItemId: props.currentDataItem.currentDataItemId,
+                                                projectId: props.currentDataItem.projectId,
+                                                text: props.currentDataItem.text,
+                                            }}
+                                            ontologyList={props.ontologyList}
+                                            addAnnotation={addAnnotation}
+                                        />}
+
+                                    {toggleIdSelected == '1' &&
+                                        <ConceptSuggest currentDataItem={{
+                                            currentDataItemId: props.currentDataItem.currentDataItemId,
+                                            projectId: props.currentDataItem.projectId,
+                                            text: props.currentDataItem.text,
+                                        }} ontologyList={props.ontologyList}
+                                                        addAnnotation={addAnnotation}/>
+                                    }</>}
+                            {props.ontologyList != "maelstrom" &&
                                 <ConceptSearch
                                     currentDataItem={{
                                         currentDataItemId: props.currentDataItem.currentDataItemId,
@@ -91,15 +112,6 @@ export default (props: {
                                     ontologyList={props.ontologyList}
                                     addAnnotation={addAnnotation}
                                 />}
-
-                            {toggleIdSelected == '1' &&
-                                <ConceptSuggest currentDataItem={{
-                                    currentDataItemId: props.currentDataItem.currentDataItemId,
-                                    projectId: props.currentDataItem.projectId,
-                                    text: props.currentDataItem.text,
-                                }} ontologyList={props.ontologyList}
-                                                addAnnotation={addAnnotation}/>
-                            }
                         </EuiFlexItem>
                     </>
                 </EuiFlexGroup>
