@@ -11,6 +11,7 @@ export default (props: {
         projectId: string;
         text: string;
     };
+    addAnnotation: Function;
     ontologyList: string | undefined;
 }) => {
     const queryClient = useQueryClient();
@@ -19,33 +20,33 @@ export default (props: {
         `1`
     );
 
-    const mutation = useMutation(
-        (item: any) =>
-            fetch(
-                `/api/annotation?projectId=${props.currentDataItem.projectId}&currentDataItemId=${props.currentDataItem.currentDataItemId}`,
-                {
-                    method: "PUT",
-                    body: JSON.stringify({
-                        content: item,
-                    }),
-                }
-            ).then((result) => result.json()),
-        {
-            onSuccess: (result) => {
-                queryClient.invalidateQueries("annotation");
-                result === "isInDB"
-                    ? addToast(createSuccessToast("Annotation exists.", ""))
-                    : addToast(createSuccessToast("Annotation saved!", ""));
-            },
-            onError: () => {
-                addToast(createDangerToast("Annotation not saved!", ""));
-            },
-        }
-    );
-
-    const addAnnotation = (item: any) => {
-        mutation.mutate(item);
-    };
+    // const mutation = useMutation(
+    //     (item: any) =>
+    //         fetch(
+    //             `/api/annotation?projectId=${props.currentDataItem.projectId}&currentDataItemId=${props.currentDataItem.currentDataItemId}`,
+    //             {
+    //                 method: "PUT",
+    //                 body: JSON.stringify({
+    //                     content: item,
+    //                 }),
+    //             }
+    //         ).then((result) => result.json()),
+    //     {
+    //         onSuccess: (result) => {
+    //             queryClient.invalidateQueries("annotation");
+    //             result === "isInDB"
+    //                 ? addToast(createSuccessToast("Annotation exists.", ""))
+    //                 : addToast(createSuccessToast("Annotation saved!", ""));
+    //         },
+    //         onError: () => {
+    //             addToast(createDangerToast("Annotation not saved!", ""));
+    //         },
+    //     }
+    // );
+    //
+    // const addAnnotation = (item: any) => {
+    //     mutation.mutate(item);
+    // };
 
     const toggleButtons = [
         {
@@ -91,7 +92,7 @@ export default (props: {
                                                 text: props.currentDataItem.text,
                                             }}
                                             ontologyList={props.ontologyList}
-                                            addAnnotation={addAnnotation}
+                                            addAnnotation={props.addAnnotation}
                                         />}
 
                                     {toggleIdSelected == '1' &&
@@ -100,7 +101,7 @@ export default (props: {
                                             projectId: props.currentDataItem.projectId,
                                             text: props.currentDataItem.text,
                                         }} ontologyList={props.ontologyList}
-                                                        addAnnotation={addAnnotation}/>
+                                                        addAnnotation={props.addAnnotation}/>
                                     }</>}
                             {props.ontologyList != "maelstrom" &&
                                 <ConceptSearch
@@ -110,11 +111,12 @@ export default (props: {
                                         text: props.currentDataItem.text,
                                     }}
                                     ontologyList={props.ontologyList}
-                                    addAnnotation={addAnnotation}
+                                    addAnnotation={props.addAnnotation}
                                 />}
                         </EuiFlexItem>
                     </>
                 </EuiFlexGroup>
+
             </EuiFlexGroup>
         </>
     );

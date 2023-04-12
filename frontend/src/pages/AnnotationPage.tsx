@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import CurrentItemArea from "../components/currentDataItem/CurrentItemArea";
@@ -23,6 +23,8 @@ import InstrumentOverview from "../components/dataOverview/InstrumentOverview";
 
 import { useMatomo } from "@datapunt/matomo-tracker-react";
 import ExportPage from "../components/export/Export";
+import InstrumentTable from '../components/dataOverview/InstrumentTable'
+import { createDangerToast, createSuccessToast, useToastContext } from '../components/toast/ToastContext'
 
 export default () => {
   const { trackPageView } = useMatomo();
@@ -39,6 +41,8 @@ export default () => {
   const [hasVisibleFlyout, setHasVisibleFlyout] = useState(false);
   const [hasVisibleFlyoutExport, setHasVisibleFlyoutExport] = useState(false);
   const [currentItemNumber, setCurrentItemNumber] = useState(0);
+  const queryClient = useQueryClient();
+    const { addToast } = useToastContext();
 
   const toggleFlyout = () => setHasVisibleFlyout(!hasVisibleFlyout);
   const toggleFlyoutExport = () =>
@@ -80,6 +84,36 @@ export default () => {
     }
   }, [currentDataItem]);
 
+  const mutation = useMutation(
+        (item: any) =>
+            fetch(
+                `/api/annotation?projectId=${currentDataItem?.projectId}&currentDataItemId=${currentDataItem?.currentDataItemId}`,
+                {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        content: item,
+                    }),
+                }
+            ).then((result) => result.json()),
+        {
+            onSuccess: (result) => {
+                queryClient.invalidateQueries("annotation");
+                result === "isInDB"
+                    ? addToast(createSuccessToast("Annotation exists.", ""))
+                    : addToast(createSuccessToast("Annotation saved!", ""));
+            },
+            onError: () => {
+                addToast(createDangerToast("Annotation not saved!", ""));
+            },
+        }
+    );
+
+    const addAnnotation = (item: any) => {
+        mutation.mutate(item);
+        console.log("item", item)
+        console.log("current", currentDataItem)
+    };
+
   const nextDataItem = () => {
     if (currentDataItem) {
       setCurrentItemNumber((currentItemNumber) => currentItemNumber + 1);
@@ -96,7 +130,7 @@ export default () => {
 
   if (hasVisibleFlyout && currentDataItem && isSuccess) {
     flyout = (
-      <InstrumentOverview
+      <InstrumentTable
         currentDataItem={{
           currentDataItemId: currentDataItem.currentDataItemId,
           projectId: currentDataItem.projectId,
@@ -107,6 +141,7 @@ export default () => {
         toggleFlyout={toggleFlyout}
         setCurrentItemNumber={setCurrentItemNumber}
         currentItemNumber={currentItemNumber}
+        addAnnotation={addAnnotation}
       />
     );
   }
@@ -223,6 +258,7 @@ export default () => {
                       projectId: currentDataItem.projectId,
                       text: currentDataItem.text,
                     }}
+                    addAnnotation={addAnnotation}
                     ontologyList={ontologyList}
                   />
                 </>
