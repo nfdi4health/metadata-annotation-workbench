@@ -1,57 +1,47 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
     Comparators,
     Criteria,
     EuiBasicTable,
     EuiBasicTableColumn,
     EuiButton,
-    EuiFlexGroup,
-    EuiFlexItem,
     EuiFlyout,
     EuiFlyoutBody,
     EuiFlyoutHeader,
+    EuiModal,
+    EuiModalBody,
+    EuiModalFooter,
+    EuiModalHeader,
+    EuiModalHeaderTitle,
     EuiSpacer,
     EuiTableSelectionType,
     EuiTableSortingType,
-    EuiText,
+    EuiText
 } from '@elastic/eui';
 import Annotation from '../currentDataItem/Annotation'
 import { useParams } from 'react-router-dom'
+import ConceptSearch from '../annotations/ConceptSearch'
+import { Question } from '../../pages/AnnotationPage'
 
-type Question = {
-    instrument_name: string;
-    linkId: number;
-    pk_item: number;
-    row_num_item: number;
-    section: string;
-    text: string;
-    type: string;
-    typeX: string;
-}
-
-export default (props: {
+export interface InstrumentTableProps {
     currentDataItem: {
         currentDataItemId: number;
         projectId: string;
         text: string;
         setCurrentDataItem: Function;
-    };
+    }
     data: Question[];
     toggleFlyout: Function;
     setCurrentItemNumber: Function;
     currentItemNumber: any;
     addAnnotation: Function;
-}) => {
-    const { projectId, ontologyList } = useParams();
+    ontologyList: any
+    annotateSelectedItems: Function
+}
 
-    // const { data, isSuccess } = useQuery(
-    //     ["questions", projectId],
-    //     () => {
-    //         return fetch(`/api/dataItems?projectId=${projectId}`).then((result) =>
-    //             result.json()
-    //         );
-    //     }
-    // );
+export default (props: InstrumentTableProps) => {
+    const tableRef = useRef<EuiBasicTable | null>(null);
+
     const edit = (item: any) => {
         props.setCurrentItemNumber(item.row_num_item - 1);
         props.toggleFlyout();
@@ -61,13 +51,10 @@ export default (props: {
         {
             field: "text",
             name: "Question",
-            // width: "20%",
         },
         {
             field: "linkId",
             name: "Annotation",
-            // anno: ((dataItem.code !== "") && (dataItem.code !== "No annotation found")),
-            // width: "15%",
             render: (linkId: number) => {
                 return (
                     <Annotation
@@ -102,62 +89,20 @@ export default (props: {
         setSelectedItems(selectedItems);
     };
 
-    const tableRef = useRef<EuiBasicTable | null>(null);
-    // const selectOnlineUsers = () => {
-    //   tableRef.current?.setSelection(onlineUsers);
-    // };
-
     const selection: EuiTableSelectionType<Question> = {
-        selectable: (question: Question) => true,
+        selectable: () => true,
         selectableMessage: (selectable: boolean) =>
-            !selectable ? 'User is currently offline' : '',
+            !selectable ? 'Not selectable' : '',
         onSelectionChange,
         initialSelected: [],
     };
 
-    const deselectSelectedQuestions = () => {
-        const arr: Question[] = selectedItems.filter(item => item.text == "-1")
-        setSelectedItems(arr)
-        console.log("deselect")
-    }
-
-    const annotateQuestionsByIds = (...ids: number[]) => {
-        ids.forEach((id) => {
-            const index = props.data.findIndex((question: Question) => question.linkId === id);
-            console.log("annotateSelected")
-            // if (index >= 0) {
-            //   users.splice(index, 1);
-            // }
-        });
-    };
-
-    const annotateSelectedQuestions = () => {
-        annotateQuestionsByIds(...selectedItems.map((question: Question) => question.linkId));
-        // setSelectedItems([]);
-    };
-
-
-    const deleteButton =
-        selectedItems.length > 0 ? (
-            <EuiButton color="danger" iconType="trash" onClick={annotateSelectedQuestions}>
-                Delete {selectedItems.length} questions
-            </EuiButton>
-        ) : null;
-
-    const deselectButton =
-        selectedItems.length > 0 ? (
-            <EuiButton color="danger" iconType="trash" onClick={deselectSelectedQuestions}>
-                Deselect {selectedItems.length} questions
-            </EuiButton>
-        ) : null;
 
     /**
-     * Pagination & sorting
+     * Pagination
      */
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(5);
-    const [sortField, setSortField] = useState<keyof Question>('text');
-    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const onTableChange = ({ page, sort }: Criteria<Question>) => {
         if (page) {
@@ -165,32 +110,13 @@ export default (props: {
             setPageIndex(pageIndex);
             setPageSize(pageSize);
         }
-        if (sort) {
-            const { field: sortField, direction: sortDirection } = sort;
-            setSortField(sortField);
-            setSortDirection(sortDirection);
-        }
     };
-
-    // Manually handle sorting and pagination of data
     const findUsers = (
         data: Question[],
         pageIndex: number,
         pageSize: number,
-        sortField: keyof Question,
-        sortDirection: 'asc' | 'desc'
     ) => {
-        let items;
-
-        if (sortField) {
-            items = data
-                .slice(0)
-                .sort(
-                    Comparators.property(sortField, Comparators.default(sortDirection))
-                );
-        } else {
-            items = data;
-        }
+        const items = data;
 
         let pageOfItems;
 
@@ -213,9 +139,7 @@ export default (props: {
     const { pageOfItems, totalItemCount } = findUsers(
         props.data,
         pageIndex,
-        pageSize,
-        sortField,
-        sortDirection
+        pageSize
     );
 
     const pagination = {
@@ -225,14 +149,43 @@ export default (props: {
         pageSizeOptions: [3, 5, 10, 20, 100],
     };
 
-    const sorting: EuiTableSortingType<Question> = {
-        sort: {
-            field: sortField,
-            direction: sortDirection,
-        },
-    };
+    /**
+     * Modal
+     */
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const closeModal = () => setIsModalVisible(false);
+    const showModal = () => setIsModalVisible(true);
 
-    console.log("selection", selectedItems)
+    let modal;
+
+    if (isModalVisible) {
+        modal = (
+            <EuiModal onClose={closeModal} maxWidth={false}>
+                <EuiModalHeader>
+                    <EuiModalHeaderTitle>Search</EuiModalHeaderTitle>
+                </EuiModalHeader>
+
+                <EuiModalBody>
+                    <ConceptSearch
+                        currentDataItem={{
+                            currentDataItemId: props.currentDataItem.currentDataItemId,
+                            projectId: props.currentDataItem.projectId,
+                            text: props.currentDataItem.text,
+                        }}
+                        ontologyList={props.ontologyList}
+                        addAnnotation={props.annotateSelectedItems}
+                        selectedItems={selectedItems}
+                    />
+                </EuiModalBody>
+
+                <EuiModalFooter>
+                    <EuiButton onClick={closeModal} fill>
+                        Close
+                    </EuiButton>
+                </EuiModalFooter>
+            </EuiModal>
+        );
+    }
 
     return (
         <div>
@@ -244,13 +197,8 @@ export default (props: {
                 </EuiFlyoutHeader>
                 <EuiFlyoutBody>
 
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                        <EuiFlexItem grow={false}>
-                            {/*<EuiButton onClick={selectOnlineUsers}>Select online users</EuiButton>*/}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>{deleteButton}</EuiFlexItem>
-                        <EuiFlexItem grow={false}>{deselectButton}</EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiButton onClick={showModal}>Annotate</EuiButton>
+                    {modal}
 
                     <EuiSpacer size="l"/>
 
@@ -262,11 +210,10 @@ export default (props: {
                             itemId="linkId"
                             columns={columns}
                             pagination={pagination}
-                            sorting={sorting}
                             isSelectable={true}
                             selection={selection}
                             onChange={onTableChange}
-                            rowHeader="firstName"
+                            rowHeader="text"
                         />}
                 </EuiFlyoutBody>
             </EuiFlyout>

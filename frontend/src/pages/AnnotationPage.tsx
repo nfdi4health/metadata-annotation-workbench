@@ -18,13 +18,29 @@ import {
   EuiText,
   EuiToolTip,
 } from "@elastic/eui";
-import ConceptArea from "../components/annotations/ConceptArea";
 import InstrumentOverview from "../components/dataOverview/InstrumentOverview";
 
 import { useMatomo } from "@datapunt/matomo-tracker-react";
 import ExportPage from "../components/export/Export";
 import InstrumentTable from '../components/dataOverview/InstrumentTable'
 import { createDangerToast, createSuccessToast, useToastContext } from '../components/toast/ToastContext'
+import ConceptArea from '../components/annotations/ConceptArea'
+
+export type Question = {
+    instrument_name: string;
+    linkId: number;
+    pk_item: number;
+    row_num_item: number;
+    section: string;
+    text: string;
+    type: string;
+    typeX: string;
+}
+
+interface mutationInputParams {
+    question: any,
+    annotationItem: any
+}
 
 export default () => {
   const { trackPageView } = useMatomo();
@@ -110,8 +126,6 @@ export default () => {
 
     const addAnnotation = (item: any) => {
         mutation.mutate(item);
-        console.log("item", item)
-        console.log("current", currentDataItem)
     };
 
   const nextDataItem = () => {
@@ -128,6 +142,40 @@ export default () => {
 
   let flyout;
 
+  const addMultipleAnnotation = useMutation(
+        ({ question, annotationItem }: mutationInputParams) =>
+            fetch(
+                `/api/annotation?projectId=${question.instrument_name}&currentDataItemId=${question.linkId}`,
+                {
+                    method: "PUT",
+                    body: JSON.stringify({
+                        content: annotationItem,
+                    }),
+                }
+            ).then((result) => result.json()),
+        {
+            onSuccess: (result) => {
+                queryClient.invalidateQueries("annotation");
+                result === "isInDB"
+                    ? addToast(createSuccessToast("Annotation exists.", ""))
+                    : addToast(createSuccessToast("Annotation saved!", ""));
+            },
+            onError: () => {
+                addToast(createDangerToast("Annotation not saved!", ""));
+            },
+        }
+    );
+
+    const addAnnotationToSelectedItem = (question: Question, annotationItem: any) => {
+        addMultipleAnnotation.mutate({ question, annotationItem });
+    };
+
+    const annotateSelectedItems = (annotationItem: any, selectedItems: Question[]) => {
+        if (selectedItems && selectedItems.length > 0) {
+            selectedItems.forEach((question: Question) => addAnnotationToSelectedItem(question, annotationItem))
+        }
+    }
+
   if (hasVisibleFlyout && currentDataItem && isSuccess) {
     flyout = (
       <InstrumentTable
@@ -142,6 +190,8 @@ export default () => {
         setCurrentItemNumber={setCurrentItemNumber}
         currentItemNumber={currentItemNumber}
         addAnnotation={addAnnotation}
+        ontologyList={ontologyList}
+        annotateSelectedItems={annotateSelectedItems}
       />
     );
   }
@@ -216,7 +266,7 @@ export default () => {
 
                   <EuiPanel>
                     <EuiText>
-                      <h4>Current Item</h4>
+                      <h4>Current variable</h4>
                     </EuiText>
                     <EuiSpacer size="m" />
                     <CurrentItemArea
@@ -233,7 +283,7 @@ export default () => {
                           onClick={() => previousDataItem()}
                           fill
                         >
-                          Previous item
+                          Previous variable
                         </EuiButton>
                       </EuiFlexItem>
                       <EuiFlexItem>
@@ -244,7 +294,7 @@ export default () => {
                           onClick={() => nextDataItem()}
                           fill
                         >
-                          Next item
+                          Next variable
                         </EuiButton>
                       </EuiFlexItem>
                     </EuiFlexGroup>

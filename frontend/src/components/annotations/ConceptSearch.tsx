@@ -15,21 +15,20 @@ import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
 import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 import CustomEuiTable from './CustomEuiTable'
+import { Question } from '../../pages/AnnotationPage'
 
-export default (props: {
+export interface ConceptSearchProps {
     currentDataItem: {
-        currentDataItemId: number;
-        projectId: string;
-        text: string;
-    };
-
-    ontologyList: string | undefined;
+        currentDataItemId: number,
+        projectId: string,
+        text: string,
+    }
+    ontologyList: string | undefined
     addAnnotation: Function;
-}) => {
-    const [pageIndex, setPageIndex] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
-    const [itemsPage, setItemsPage] = useState();
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
+    selectedItems?: Question[];
+}
+
+export default (props: ConceptSearchProps) => {
     const [searchValue, setSearchValue] = useState(props.currentDataItem.text);
     const [viewConcept, setViewConcept] = useState();
     const [currentConcept, setCurrentConcept] = useState<OLSConceptIF>();
@@ -98,7 +97,7 @@ export default (props: {
             icon: "plusInCircleFilled",
             type: "icon",
             color: "primary",
-            onClick: props.addAnnotation,
+            onClick: (annotationItem: any) => props.addAnnotation(annotationItem, props.selectedItems),
         },
     ];
 
