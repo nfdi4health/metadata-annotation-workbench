@@ -16,6 +16,7 @@ import { OLSConceptIF } from "../../api";
 import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 import CustomEuiTable from './CustomEuiTable'
 import { Question } from '../../pages/AnnotationPage'
+import { useParams } from 'react-router-dom'
 
 export interface ConceptSearchProps {
     currentDataItem: {
@@ -23,15 +24,16 @@ export interface ConceptSearchProps {
         projectId: string,
         text: string,
     }
-    ontologyList: string | undefined
     addAnnotation: Function;
     selectedItems?: Question[];
+    ontologyList?: string;
 }
 
 export default (props: ConceptSearchProps) => {
     const [searchValue, setSearchValue] = useState(props.currentDataItem.text);
     const [viewConcept, setViewConcept] = useState();
     const [currentConcept, setCurrentConcept] = useState<OLSConceptIF>();
+    const { ontologyList = "" } = useParams();
 
     const queryClient = useQueryClient();
 
@@ -45,7 +47,7 @@ export default (props: ConceptSearchProps) => {
         ["semlookp_search_search", searchValue, props.currentDataItem],
         () => {
             return fetch(
-                `/api/ols?q=${searchValue}&ontology=${props.ontologyList}`
+                `/api/ols?q=${searchValue}&ontology=${ontologyList}`
             ).then((result) => result.json());
         }
     );
@@ -205,12 +207,8 @@ export default (props: ConceptSearchProps) => {
                                 <MetadataWidget
                                     iri={viewConcept}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
-                                    linkToSelf={
-                                        "https://semanticlookup.zbmed.de/ols/api/ontologies/" +
-                                        currentConcept?.ontology +
-                                        "/terms/"
-                                    }
-                                />
+                                    objType={"term"}
+                                    ontologyID={ontologyList.split(',')[0]}/>
                             </EuiCard>
                         )}
                     </EuiPanel>

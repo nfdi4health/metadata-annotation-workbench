@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
 import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 import CustomEuiTable from './CustomEuiTable'
+import { useParams } from 'react-router-dom'
 
 export default (props: {
     currentDataItem: {
@@ -21,7 +22,7 @@ export default (props: {
         text: string;
     };
 
-    ontologyList: string | undefined;
+    ontologyList: string;
     addAnnotation: Function;
 }) => {
     const [pageIndex, setPageIndex] = useState(0);
@@ -31,6 +32,7 @@ export default (props: {
     const [searchValue, setSearchValue] = useState(props.currentDataItem.text);
     const [viewConcept, setViewConcept] = useState();
     const [currentConcept, setCurrentConcept] = useState<OLSConceptIF>();
+    const { ontologyList = "" } = useParams();
 
     const {
         isSuccess,
@@ -170,11 +172,8 @@ export default (props: {
                                 <MetadataWidget
                                     iri={viewConcept}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
-                                    linkToSelf={
-                                        "https://semanticlookup.zbmed.de/ols/api/ontologies/" +
-                                        currentConcept?.ontology +
-                                        "/terms/"
-                                    }
+                                    objType={'term'}
+                                    ontologyID={ontologyList.split(',')[0]}
                                 />
                             </EuiCard>
                         )}

@@ -35,12 +35,13 @@ export interface InstrumentTableProps {
     setCurrentItemNumber: Function;
     currentItemNumber: any;
     addAnnotation: Function;
-    ontologyList: any
-    annotateSelectedItems: Function
+    annotateSelectedItems: Function;
+    ontologyList?: string;
 }
 
 export default (props: InstrumentTableProps) => {
     const tableRef = useRef<EuiBasicTable | null>(null);
+    const { ontologyList = "" } = useParams();
 
     const edit = (item: any) => {
         props.setCurrentItemNumber(item.row_num_item - 1);
@@ -172,7 +173,7 @@ export default (props: InstrumentTableProps) => {
                             projectId: props.currentDataItem.projectId,
                             text: props.currentDataItem.text,
                         }}
-                        ontologyList={props.ontologyList}
+                        ontologyList={ontologyList}
                         addAnnotation={props.annotateSelectedItems}
                         selectedItems={selectedItems}
                     />

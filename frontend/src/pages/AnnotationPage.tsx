@@ -49,7 +49,7 @@ export default () => {
     trackPageView({});
   }, []);
 
-  const { projectId, ontologyList } = useParams();
+  const { projectId, ontologyList = "" } = useParams();
   const [currentDataItem, setCurrentDataItem] = useState<DataItemIF>();
   const [hasPreviousDataItem, setHasPreviousDataItem] = useState(false);
   const [hasNextDataItem, setHasNextDataItem] = useState(true);

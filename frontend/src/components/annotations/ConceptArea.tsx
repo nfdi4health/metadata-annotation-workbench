@@ -5,6 +5,7 @@ import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from "@elastic/e
 import { createDangerToast, createSuccessToast, useToastContext, } from "../toast/ToastContext";
 import ConceptSuggest from './ConceptSuggest'
 import { Question } from '../../pages/AnnotationPage'
+import { useParams } from 'react-router-dom'
 
 export interface ConceptAreaProps {
     currentDataItem: {
@@ -13,13 +14,14 @@ export interface ConceptAreaProps {
         text: string,
     }
     addAnnotation: Function,
-    ontologyList: string | undefined
+    ontologyList?: string;
 }
 
 export default (props: ConceptAreaProps) => {
     const [toggleIdSelected, setToggleIdSelected] = useState(
         `1`
     );
+    const { ontologyList = "" } = useParams();
 
     const toggleButtons = [
         {
@@ -47,7 +49,7 @@ export default (props: ConceptAreaProps) => {
                     onChange={(id) => onChange(id)}
                     color="primary"
                     buttonSize="m"
-                    isDisabled={props.ontologyList !== "maelstrom"}
+                    isDisabled={ontologyList !== "maelstrom"}
                 />
 
                 <EuiSpacer size="m"/>
@@ -55,7 +57,7 @@ export default (props: ConceptAreaProps) => {
                 <EuiFlexGroup>
                     <>
                         <EuiFlexItem>
-                            {props.ontologyList == "maelstrom" &&
+                            {ontologyList == "maelstrom" &&
                                 <>
                                     {toggleIdSelected == '2' &&
                                         <ConceptSearch
@@ -64,7 +66,7 @@ export default (props: ConceptAreaProps) => {
                                                 projectId: props.currentDataItem.projectId,
                                                 text: props.currentDataItem.text,
                                             }}
-                                            ontologyList={props.ontologyList}
+                                            ontologyList={ontologyList}
                                             addAnnotation={props.addAnnotation}
                                         />}
 
@@ -74,18 +76,18 @@ export default (props: ConceptAreaProps) => {
                                             projectId: props.currentDataItem.projectId,
                                             text: props.currentDataItem.text,
                                         }}
-                                                        ontologyList={props.ontologyList}
+                                                        ontologyList={ontologyList}
                                                         addAnnotation={props.addAnnotation}
                                         />
                                     }</>}
-                            {props.ontologyList != "maelstrom" &&
+                            {ontologyList != "maelstrom" &&
                                 <ConceptSearch
                                     currentDataItem={{
                                         currentDataItemId: props.currentDataItem.currentDataItemId,
                                         projectId: props.currentDataItem.projectId,
                                         text: props.currentDataItem.text,
                                     }}
-                                    ontologyList={props.ontologyList}
+                                    ontologyList={ontologyList}
                                     addAnnotation={props.addAnnotation}
                                 />}
                         </EuiFlexItem>
