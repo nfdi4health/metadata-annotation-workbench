@@ -1,4 +1,7 @@
 import os
+import uuid
+
+from parser import ParserError
 
 import pandas as pd
 import requests
@@ -15,7 +18,7 @@ from restapi.services.exporter.export_questionnaire import db_to_fhirJson, db_to
 from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations, \
     get_original_xlsx_and_annotations_for_mica
 from restapi.services.filter_search_results import filter_class, filter_maelstrom_domains, filter_ontology_information
-from restapi.services.importer.import_excel import single_column_to_db
+from restapi.services.importer.import_xlsx_and_csv import single_column_to_db
 from restapi.services.importer.import_maelstrom import import_maelstrom
 from restapi.services.importer.import_questionnaire import questionnaire_to_db
 from restapi.database import init_db, session, engine
@@ -205,37 +208,60 @@ def create_app(test_config=None):
                                })
         return jsonify([c for c in ontologies])
 
-    @app.route('/api/columns', methods=["POST"])
+    @app.route('/api/instrument/columns', methods=["POST"])
     def get_columns():
-        if not os.path.exists(instruments):
-            os.makedirs(instruments)
-        importFile = request.files.get("file", None)
-        importFile.save(os.path.join(instruments, importFile.filename))
-        df = pd.read_excel(os.path.join(instruments, importFile.filename))
+        file_to_import = request.files.get("file", None)
+
+        if not os.path.exists(instruments + "/tmp"):
+            os.makedirs(instruments + "/tmp")
+
+        file_to_import.save(instruments + "/tmp/" + file_to_import.filename)
+
+        if file_to_import.filename.split(".")[-1] == "xlsx":
+            df = pd.read_excel(instruments + "/tmp/" + file_to_import.filename)
+        if file_to_import.filename.split(".")[-1] == "csv":
+            df = pd.read_csv(instruments + "/tmp/" + file_to_import.filename)
+
+        try:
+            os.remove(instruments + "/tmp/" + file_to_import.filename)
+        except OSError:
+            pass
+
         return jsonify(list(df.columns.values))
 
     @app.route('/api/instrument', methods=["POST"])
     def import_instrument():
-        project_name = request.args.get('projectId', type=str)
-        importFile = request.files.get("file", None)
-        col = request.args.get("col", None)
+        project_id = request.args.get('projectId', type=str)
+        file_to_import = request.files.get("file", None)
+        column_to_annotate = request.args.get("col", None)
 
-        d = json.loads(col)
-        exists = db.session.query(Instrument.name).filter_by(name=project_name).first() is not None
+        original_filename = os.path.join(file_to_import.filename)
+        file_to_import.save(os.path.join(instruments, file_to_import.filename))
+        file_id = uuid.uuid1()
+        unique_filename = os.path.join(str(file_id) + "." + file_to_import.filename.split(".")[-1])
+
+        try:
+            os.rename(os.path.join(instruments, original_filename), os.path.join(instruments, unique_filename))
+        except OSError:
+            pass
+
+        dict_column_to_annotate = json.loads(column_to_annotate)
+        exists = db.session.query(Instrument.name).filter_by(name=project_id).first() is not None
         if exists:
             return jsonify("success")
         else:
-            if not os.path.exists(instruments):
-                os.makedirs(instruments)
+            if original_filename.split(".")[-1] == "xlsx":
+                instrument_type = "xlsx"
+                df = pd.read_excel(os.path.join(instruments, unique_filename))
+            if original_filename.split(".")[-1] == "csv":
+                instrument_type = "csv"
+                df = pd.read_csv(os.path.join(instruments, unique_filename))
 
-            importFile.save(os.path.join(instruments, importFile.filename))
-            file_name = os.path.join(instruments, importFile.filename)
-            if importFile.filename.split(".")[-1] == "xlsx":
-                q = single_column_to_db(file_name, project_name, d[0]['label'], importFile.filename)
+            q = single_column_to_db(df, project_id, dict_column_to_annotate[0]['label'], original_filename, instrument_type, unique_filename)
 
-                session.add(q)
-                session.commit()
-                return jsonify("success")
+            session.add(q)
+            session.commit()
+            return jsonify("success")
 
     @app.route('/api/instrument', methods=["GET"])
     def export_file():
