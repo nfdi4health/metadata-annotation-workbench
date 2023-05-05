@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import saveAs from "file-saver";
 import { useMutation } from "react-query";
 import { useParams } from "react-router-dom";
-import { EuiButton, EuiSpacer } from "@elastic/eui";
-import ExportFormat from "./ExportFormat";
-import { useNavigate } from "react-router";
+import { EuiButton, EuiSpacer, EuiToolTip } from "@elastic/eui";
+import ExportDropDown from './ExportDropDown'
 
 export default () => {
   const { projectId } = useParams();
-  const [format, setFormat] = useState("mica");
+  const [exportForm, setExportForm] = useState("default");
+  const [exportFormat, setExportFormat] = useState("xlsx");
 
   const mutation_export_json = useMutation(() => {
     return fetch(
-      "/api/instrument?projectName=" + projectId + "&format=" + format,
+      "/api/instrument?projectName=" + projectId + "&exportForm=" + exportForm + "&exportFormat=" + exportFormat,
       {
         method: "GET",
         headers: {
@@ -24,9 +24,9 @@ export default () => {
       .then((blob) => saveAs.saveAs(blob, "file.json"));
   });
 
-  const mutation_export_excel = useMutation(() => {
+  const mutation_export_xlsx = useMutation(() => {
     return fetch(
-      "/api/instrument?projectName=" + projectId + "&format=" + format,
+      "/api/instrument?projectName=" + projectId + "&exportForm=" + exportForm + "&exportFormat=" + exportFormat,
       {
         method: "GET",
         headers: {
@@ -38,16 +38,48 @@ export default () => {
       .then((blob) => saveAs.saveAs(blob, "file.xlsx"));
   });
 
+  const mutation_export_csv = useMutation(() => {
+    return fetch(
+      "/api/instrument?projectName=" + projectId + "&exportForm=" + exportForm + "&exportFormat=" + exportFormat,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "text/csv",
+        },
+      }
+    )
+      .then((response) => response.blob())
+      .then((blob) => saveAs.saveAs(blob, "file.csv"));
+  });
+
   const saveFile = () => {
-    mutation_export_excel.mutate();
+      if(exportFormat == "xlsx"){
+          mutation_export_xlsx.mutate()
+      }
+      if(exportFormat == "csv"){
+          mutation_export_csv.mutate()
+      }
   };
+
+  const optionsForm = [
+    { value: "default", text: "Default" },
+    { value: "opal", text: "Maelstrom OPAL" },
+    { value: "simple", text: "Maelstrom simple form" },
+  ];
+
+  const optionsFormat = [
+    { value: "xlsx", text: "XLSX" },
+    { value: "csv", text: "CSV" },
+  ];
 
   return (
     <>
-      <ExportFormat setFormat={setFormat} format={format} />
+      <ExportDropDown onChange={setExportFormat} options={optionsFormat} title={"File format"} type={exportFormat}/>
       <EuiSpacer />
-      <EuiButton fill onClick={saveFile}>
-        Export
+        <ExportDropDown onChange={setExportForm} options={optionsForm} title={"File form"} type={exportForm}/>
+        <EuiSpacer />
+      <EuiButton fill onClick={saveFile} iconType={'download'}>
+        Download
       </EuiButton>
     </>
   );

@@ -391,10 +391,13 @@ export default () => {
                             <EuiSpacer size="m"/>
                             <EuiText>
                                 <p>
-                                    The project can be exported as Excel Spreadsheets.
+                                    The project can be exported as Excel Spreadsheets or CSV.
                                     Annotations are included as separate columns.
                                     The different export options vary in compositions of the columns and information.
                                 </p>
+                                <p><b>Default:</b> Label (e.g. <i>Age (qualifier value)</i>), ID (e.g. <i>397669002</i>), IRI (e.g. <i>http://snomed.info/id/397669002</i>) and ontology (e.g. <i>snomed</i>) in separate columns</p>
+                                <p><b>Maelstrom OPAL:</b> Maelstrom domain (e.g. Mlstr_area::Sociodemographic_economic_characteristics) as column header, Maelstrom tag (e.g. Age) in column cell. Only available for annotations with the Maelstrom taxonomy!</p>
+                                <p><b>Maelstrom simple form:</b> combined Maelstrom annotation (e.g. <i>Mlstr_area::Administrative information::Other administrative information</i>) in columns</p>
                             </EuiText>
                             <EuiSpacer size="s"/>
                             <EuiImage

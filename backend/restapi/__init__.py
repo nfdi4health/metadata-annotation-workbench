@@ -41,7 +41,7 @@ def create_app(test_config=None):
     db.init_app(app)
 
     ols = os.environ.get('API_SEMLOOKP')
-    instruments = os.environ.get('INSTRUMENTS')
+    INSTRUMENTS = os.environ.get('INSTRUMENTS')
     API_PREDICT = os.environ.get('API_PREDICT')
 
     @app.teardown_appcontext
@@ -212,18 +212,18 @@ def create_app(test_config=None):
     def get_columns():
         file_to_import = request.files.get("file", None)
 
-        if not os.path.exists(instruments + "/tmp"):
-            os.makedirs(instruments + "/tmp")
+        if not os.path.exists(INSTRUMENTS + "/tmp"):
+            os.makedirs(INSTRUMENTS + "/tmp")
 
-        file_to_import.save(instruments + "/tmp/" + file_to_import.filename)
+        file_to_import.save(INSTRUMENTS + "/tmp/" + file_to_import.filename)
 
         if file_to_import.filename.split(".")[-1] == "xlsx":
-            df = pd.read_excel(instruments + "/tmp/" + file_to_import.filename)
+            df = pd.read_excel(INSTRUMENTS + "/tmp/" + file_to_import.filename)
         if file_to_import.filename.split(".")[-1] == "csv":
-            df = pd.read_csv(instruments + "/tmp/" + file_to_import.filename)
+            df = pd.read_csv(INSTRUMENTS + "/tmp/" + file_to_import.filename)
 
         try:
-            os.remove(instruments + "/tmp/" + file_to_import.filename)
+            os.remove(INSTRUMENTS + "/tmp/" + file_to_import.filename)
         except OSError:
             pass
 
@@ -236,12 +236,12 @@ def create_app(test_config=None):
         column_to_annotate = request.args.get("col", None)
 
         original_filename = os.path.join(file_to_import.filename)
-        file_to_import.save(os.path.join(instruments, file_to_import.filename))
+        file_to_import.save(os.path.join(INSTRUMENTS, file_to_import.filename))
         file_id = uuid.uuid1()
         unique_filename = os.path.join(str(file_id) + "." + file_to_import.filename.split(".")[-1])
 
         try:
-            os.rename(os.path.join(instruments, original_filename), os.path.join(instruments, unique_filename))
+            os.rename(os.path.join(INSTRUMENTS, original_filename), os.path.join(INSTRUMENTS, unique_filename))
         except OSError:
             pass
 
@@ -252,10 +252,10 @@ def create_app(test_config=None):
         else:
             if original_filename.split(".")[-1] == "xlsx":
                 instrument_type = "xlsx"
-                df = pd.read_excel(os.path.join(instruments, unique_filename))
+                df = pd.read_excel(os.path.join(INSTRUMENTS, unique_filename))
             if original_filename.split(".")[-1] == "csv":
                 instrument_type = "csv"
-                df = pd.read_csv(os.path.join(instruments, unique_filename))
+                df = pd.read_csv(os.path.join(INSTRUMENTS, unique_filename))
 
             q = single_column_to_db(df, project_id, dict_column_to_annotate[0]['label'], original_filename, instrument_type, unique_filename)
 
@@ -266,15 +266,26 @@ def create_app(test_config=None):
     @app.route('/api/instrument', methods=["GET"])
     def export_file():
         project_name = request.args.get('projectName', type=str)
-        format = request.args.get('format', type=str)
+        export_form = request.args.get('exportForm', type=str)
+        export_format = request.args.get('exportFormat', type=str)
 
         instrument = db.session.query(Instrument).filter_by(name=project_name).all()
         questions = db.session.query(Item).filter_by(instrument_name=project_name).all()
         answers = db.session.query(AnswerOption).filter_by(instrument_name=project_name).all()
         codes = db.session.query(Code).filter_by(instrument_name=project_name).all()
 
-        if not format:
-            return jsonify("no format")
+        original_file_format = instrument[0].original_name.split(".")[-1]
+
+        if original_file_format == "xlsx":
+            df = pd.read_excel(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        elif original_file_format == "csv":
+            df = pd.read_csv(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        else:
+            return jsonify({"error": "No supported format available. Please contact the software developer."})
+
+
+        if not export_form and export_format:
+            return jsonify({"error": "Unknown parameter. Please contact the software developer."})
         else:
             # if format == "json":
             #     if instrument[0].instrument_type == 'questionnaire':
@@ -282,24 +293,39 @@ def create_app(test_config=None):
             #     else:
             #         return jsonify("not implemented yet")
 
-            if format == "xlsxOpal":
-                df = export_maelstrom(instrument, questions, codes, instruments)
-            if format == "xlsx":
-                df = get_original_xlsx_and_annotations(instrument, questions, codes, instruments)
-            elif format == "mica":
-                df = get_original_xlsx_and_annotations_for_mica(instrument, questions, codes, instruments)
+            if export_form == "opal":
+                export_df = export_maelstrom(df, instrument, questions, codes)
+            elif export_form == "default":
+                export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
+            elif export_form == "simple":
+                export_df = get_original_xlsx_and_annotations_for_mica(df, instrument, questions, codes)
             else:
-                return jsonify("This format is not supported")
+                return jsonify({"error": "Unknown form. Please contact the software developer."})
 
-            if not os.path.exists("tmp"):
-                os.mkdir("tmp")
+            export_folder = os.path.join(INSTRUMENTS, "export")
+            if os.path.exists(export_folder):
+                for filename in os.listdir(export_folder):
+                    file_path = os.path.join(export_folder, filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception as e:
+                        print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-            if isinstance(df, str):
-                return("This format is not supported")
+            if not os.path.exists(export_folder):
+                os.mkdir(export_folder)
+
+            if isinstance(export_df, str):
+                return jsonify({"error": "Error during converting the file. Please contact the software developer."})
             else:
-                df.to_excel("tmp/document.xlsx", index=False)
+                if export_format == "xlsx":
+                    export_document_name = "doc.xlsx"
+                    export_df.to_excel(os.path.join(export_folder, export_document_name), index=False)
+                elif export_format == "csv":
+                    export_document_name = "doc.csv"
+                    export_df.to_csv(os.path.join(export_folder, export_document_name), index=False)
 
-            return send_from_directory(directory="../tmp", path="document.xlsx", as_attachment=True)
+            return send_from_directory(directory="../" + export_folder, path=export_document_name, as_attachment=True)
 
     @app.route('/api/stats/', methods=['GET'])
     def stats_documents():

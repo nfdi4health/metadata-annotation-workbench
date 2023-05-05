@@ -11,9 +11,9 @@ def get_codes_for_linkId(linkId, codes):
             codelist.append(ele.code)
     return codelist
 
-def export_maelstrom(instrument, questions, codes, instruments):
-    df = pd.read_excel(os.path.join(instruments, instrument[0].original_name))
-    df = df.reset_index()
+def export_maelstrom(df, instrument, questions, codes):
+    # df = pd.read_excel(os.path.join(instruments, instrument[0].original_name))
+    # df = df.reset_index()
     for index, row in df.iterrows():
         annotation_col = instrument[0].annotation_column
         if isinstance(row[annotation_col], str):
