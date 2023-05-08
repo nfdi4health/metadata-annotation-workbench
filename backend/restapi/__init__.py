@@ -236,7 +236,7 @@ def create_app(test_config=None):
         column_to_annotate = request.args.get("col", None)
 
         original_filename = os.path.join(file_to_import.filename)
-        file_to_import.save(os.path.join(INSTRUMENTS, file_to_import.filename))
+        file_to_import.save(os.path.join(INSTRUMENTS, original_filename))
         file_id = uuid.uuid1()
         unique_filename = os.path.join(str(file_id) + "." + file_to_import.filename.split(".")[-1])
 

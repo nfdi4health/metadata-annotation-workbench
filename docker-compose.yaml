@@ -28,7 +28,7 @@ services:
       - DB_USERNAME=postgres
       - DB_PASSWORD=postgres
       - DB_HOST=db
-      - INSTRUMENTS=/var/lib/mda/instruments
+      - INSTRUMENTS=instruments
       - API_PREDICT=http://prediction:5000
     depends_on:
       - db
