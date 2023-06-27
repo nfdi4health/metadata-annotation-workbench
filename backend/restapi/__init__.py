@@ -13,10 +13,11 @@ from urllib.parse import quote
 
 from restapi.models import db
 from restapi.models.models import Item, AnswerOption, Instrument, Code
-from restapi.services.exporter.export_maelstrom import export_maelstrom
+from restapi.services.exporter.export_maelstrom import \
+    export_maelstrom_annotations_opal, export_maelstrom_annotations_opal_only_annotations
 from restapi.services.exporter.export_questionnaire import db_to_fhirJson, db_to_df
 from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations, \
-    get_original_xlsx_and_annotations_for_mica
+    export_maelstrom_annotations_simple, export_maelstrom_annotations_simple_only_annotations, get_only_annotations
 from restapi.services.filter_search_results import filter_class, filter_maelstrom_domains, filter_ontology_information
 from restapi.services.importer.import_xlsx_and_csv import single_column_to_db
 from restapi.services.importer.import_maelstrom import import_maelstrom
@@ -263,11 +264,22 @@ def create_app(test_config=None):
             session.commit()
             return jsonify("success")
 
+
+    def read_file(original_file_format, instrument):
+        if original_file_format == "xlsx":
+            df = pd.read_excel(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        elif original_file_format == "csv":
+            df = pd.read_csv(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        else:
+            return jsonify({"error": "No supported format available. Please contact the software developer."})
+        return df
+
     @app.route('/api/instrument', methods=["GET"])
     def export_file():
         project_name = request.args.get('projectName', type=str)
         export_form = request.args.get('exportForm', type=str)
         export_format = request.args.get('exportFormat', type=str)
+        export_only_annotations = request.args.get('exportOnlyAnnotations', type=str)
 
         instrument = db.session.query(Instrument).filter_by(name=project_name).all()
         questions = db.session.query(Item).filter_by(instrument_name=project_name).all()
@@ -275,14 +287,6 @@ def create_app(test_config=None):
         codes = db.session.query(Code).filter_by(instrument_name=project_name).all()
 
         original_file_format = instrument[0].original_name.split(".")[-1]
-
-        if original_file_format == "xlsx":
-            df = pd.read_excel(os.path.join(INSTRUMENTS, instrument[0].unique_name))
-        elif original_file_format == "csv":
-            df = pd.read_csv(os.path.join(INSTRUMENTS, instrument[0].unique_name))
-        else:
-            return jsonify({"error": "No supported format available. Please contact the software developer."})
-
 
         if not export_form and export_format:
             return jsonify({"error": "Unknown parameter. Please contact the software developer."})
@@ -294,11 +298,23 @@ def create_app(test_config=None):
             #         return jsonify("not implemented yet")
 
             if export_form == "opal":
-                export_df = export_maelstrom(df, instrument, questions, codes)
+                if export_only_annotations == "true":
+                    export_df = export_maelstrom_annotations_opal_only_annotations(questions, codes)
+                else:
+                    df = read_file(original_file_format, instrument)
+                    export_df = export_maelstrom_annotations_opal(df, instrument, questions, codes)
             elif export_form == "default":
-                export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
+                if export_only_annotations == "true":
+                    export_df = get_only_annotations(questions, codes)
+                else:
+                    df = read_file(original_file_format, instrument)
+                    export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
             elif export_form == "simple":
-                export_df = get_original_xlsx_and_annotations_for_mica(df, instrument, questions, codes)
+                if export_only_annotations == "true":
+                    export_df = export_maelstrom_annotations_simple_only_annotations(questions, codes)
+                else:
+                    df = read_file(original_file_format, instrument)
+                    export_df = export_maelstrom_annotations_simple(df, instrument, questions, codes)
             else:
                 return jsonify({"error": "Unknown form. Please contact the software developer."})
 
