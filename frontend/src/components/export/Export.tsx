@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import saveAs from "file-saver";
 import { useMutation } from "react-query";
 import { useParams } from "react-router-dom";
-import { EuiButton, EuiSpacer, EuiSwitch, EuiToolTip } from "@elastic/eui";
+import { EuiButton, EuiLoadingSpinner, EuiSpacer, EuiSwitch, EuiToolTip } from "@elastic/eui";
 import ExportDropDown from './ExportDropDown'
 
 export default () => {
@@ -25,7 +25,7 @@ export default () => {
       .then((blob) => saveAs.saveAs(blob, "file.json"));
   });
 
-  const mutation_export_xlsx = useMutation(() => {
+  const {mutate: mutation_export_xlsx, isLoading: isLoadingXLSX} = useMutation(() => {
     return fetch(
       "/api/instrument?projectName=" + projectId + "&exportForm=" + exportForm + "&exportFormat=" + exportFormat + "&exportOnlyAnnotations=" + exportOnlyAnnotations,
       {
@@ -39,7 +39,7 @@ export default () => {
       .then((blob) => saveAs.saveAs(blob, "file.xlsx"));
   });
 
-  const mutation_export_csv = useMutation(() => {
+  const { mutate: mutation_export_csv, isLoading: isLoadingCSV } = useMutation(() => {
     return fetch(
       "/api/instrument?projectName=" + projectId + "&exportForm=" + exportForm + "&exportFormat=" + exportFormat + "&exportOnlyAnnotations=" + exportOnlyAnnotations,
       {
@@ -55,10 +55,12 @@ export default () => {
 
   const saveFile = () => {
       if(exportFormat == "xlsx"){
-          mutation_export_xlsx.mutate()
+          // @ts-ignore
+          mutation_export_xlsx()
       }
       if(exportFormat == "csv"){
-          mutation_export_csv.mutate()
+          // @ts-ignore
+          mutation_export_csv()
       }
   };
 
@@ -88,6 +90,7 @@ export default () => {
       <EuiButton fill onClick={saveFile} iconType={'download'}>
         Download
       </EuiButton>
+        {isLoadingXLSX || isLoadingCSV && <EuiLoadingSpinner></EuiLoadingSpinner>}
     </>
   );
 };
