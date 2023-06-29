@@ -6,7 +6,7 @@ from parser import ParserError
 import pandas as pd
 import requests
 from flask import Flask, send_from_directory
-from flask import jsonify, request, json
+from flask import jsonify, request, json, abort
 from flask_cors import CORS
 from sqlalchemy import insert
 from urllib.parse import quote
@@ -301,20 +301,32 @@ def create_app(test_config=None):
                 if export_only_annotations == "true":
                     export_df = export_maelstrom_annotations_opal_only_annotations(questions, codes)
                 else:
-                    df = read_file(original_file_format, instrument)
-                    export_df = export_maelstrom_annotations_opal(df, instrument, questions, codes)
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = export_maelstrom_annotations_opal(df, instrument, questions, codes)
             elif export_form == "default":
                 if export_only_annotations == "true":
                     export_df = get_only_annotations(questions, codes)
                 else:
-                    df = read_file(original_file_format, instrument)
-                    export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
             elif export_form == "simple":
                 if export_only_annotations == "true":
                     export_df = export_maelstrom_annotations_simple_only_annotations(questions, codes)
                 else:
-                    df = read_file(original_file_format, instrument)
-                    export_df = export_maelstrom_annotations_simple(df, instrument, questions, codes)
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = export_maelstrom_annotations_simple(df, instrument, questions, codes)
             else:
                 return jsonify({"error": "Unknown form. Please contact the software developer."})
 
