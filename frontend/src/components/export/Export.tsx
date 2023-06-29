@@ -90,7 +90,7 @@ export default () => {
       <EuiButton fill onClick={saveFile} iconType={'download'}>
         Download
       </EuiButton>
-        {isLoadingXLSX || isLoadingCSV && <EuiLoadingSpinner></EuiLoadingSpinner>}
+        {(isLoadingXLSX || isLoadingCSV) && <EuiLoadingSpinner></EuiLoadingSpinner>}
     </>
   );
 };
