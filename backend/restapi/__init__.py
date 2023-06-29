@@ -341,7 +341,7 @@ def create_app(test_config=None):
                         print('Failed to delete %s. Reason: %s' % (file_path, e))
 
             if not os.path.exists(export_folder):
-                os.mkdir(export_folder)
+                os.makedirs(export_folder)
 
             if isinstance(export_df, str):
                 return jsonify({"error": "Error during converting the file. Please contact the software developer."})
