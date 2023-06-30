@@ -374,4 +374,45 @@ def create_app(test_config=None):
         result = r.json()["prediction"][:5]
         return result
 
+    @app.route('/api/auto-annotation', methods=['GET'])
+    def auto_annotation():
+        projectId = request.args.get('projectId', type=str)
+        query = db.session.query(Item).filter_by(instrument_name=projectId).all()
+
+        isInDB = False
+
+        list_of_dicts = [c.as_dict() for c in query]
+
+        for dic in list_of_dicts:
+            req = requests.get(API_PREDICT + "/predict?variable=" + dic["text"])
+            prediction = req.json()["prediction"][:1]
+            prediction_iri = prediction[0]["iri"]
+
+            query_code = db.session.query(Code).filter_by(instrument_name=projectId) \
+                .filter_by(code_linkId=dic["linkId"]).all()
+            codes = [c.as_dict() for c in query_code]
+            for element in codes:
+                if prediction_iri == element["code"]:
+                    return jsonify('isInDB')
+            if not isInDB:
+                stmt = (
+                    insert(Code).
+                    values(code_linkId=dic["linkId"], code=prediction_iri, instrument_name=projectId)
+                )
+                session.execute(stmt)
+                session.commit()
+        return
+
+    @app.route('/api/annotations', methods=['DELETE'])
+    def remove_all_annotations():
+        projectId = request.args.get('projectId', type=str)
+
+        if projectId:
+            session.query(Code).filter_by(instrument_name=projectId) \
+                .delete()
+            session.commit()
+
+        return projectId
+
+
     return app

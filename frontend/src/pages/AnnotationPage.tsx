@@ -4,19 +4,20 @@ import React, { useEffect, useState } from "react";
 import CurrentItemArea from "../components/currentDataItem/CurrentItemArea";
 import { DataItemIF } from "../api";
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiHeader,
-  EuiPageBody,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
+    EuiButton,
+    EuiCallOut,
+    EuiFlexGroup,
+    EuiFlexItem,
+    EuiFlyout,
+    EuiFlyoutBody,
+    EuiFlyoutHeader,
+    EuiHeader,
+    EuiPageBody,
+    EuiPanel,
+    EuiSpacer,
+    EuiText,
+    EuiToolTip,
+    EuiConfirmModal, EuiLoadingSpinner
 } from "@elastic/eui";
 import InstrumentOverview from "../components/dataOverview/InstrumentOverview";
 
@@ -25,6 +26,7 @@ import ExportPage from "../components/export/Export";
 import InstrumentTable from '../components/dataOverview/InstrumentTable'
 import { createDangerToast, createSuccessToast, useToastContext } from '../components/toast/ToastContext'
 import ConceptArea from '../components/annotations/ConceptArea'
+import saveAs from 'file-saver'
 
 export type Question = {
     instrument_name: string;
@@ -63,6 +65,38 @@ export default () => {
   const toggleFlyout = () => setHasVisibleFlyout(!hasVisibleFlyout);
   const toggleFlyoutExport = () =>
     setHasVisibleFlyoutExport(!hasVisibleFlyoutExport);
+
+
+  const {mutate: autoAnno, isLoading: isLoadingAutoAnno} = useMutation(() => {
+    return fetch(
+      `/api/auto-annotation?projectId=${projectId}`,
+    )},
+        {
+      onSuccess: () => {
+        queryClient.invalidateQueries("annotation");
+        addToast(createSuccessToast("Annotations added!", ""));
+      },
+      onError: () => {
+        addToast(createDangerToast("Annotations not added!", ""));
+      },
+    }
+  );
+
+  const {mutate: deleteAllAnnotations} = useMutation(
+    (item) =>
+      fetch(`/api/annotations?projectId=${projectId}`, {
+        method: "DELETE",
+      }),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("annotation");
+        addToast(createSuccessToast("Annotations removed!", ""));
+      },
+      onError: () => {
+        addToast(createDangerToast("Annotations not removed!", ""));
+      },
+    }
+  );
 
   const { data: instrumentData, isSuccess } = useQuery(
     ["dataItems", projectId],
@@ -212,6 +246,35 @@ export default () => {
     );
   }
 
+
+  const [isDestroyModalVisible, setIsDestroyModalVisible] = useState(false);
+  const closeDestroyModal = () => setIsDestroyModalVisible(false);
+  const showDestroyModal = () => setIsDestroyModalVisible(true);
+
+  const onConfirm = () => {
+      closeDestroyModal()
+      deleteAllAnnotations()
+  }
+
+  let destroyModal;
+
+  if (isDestroyModalVisible) {
+    destroyModal = (
+      <EuiConfirmModal
+        title="Discard all annotations?"
+        onCancel={closeDestroyModal}
+        onConfirm={onConfirm}
+        cancelButtonText="Keep editing"
+        confirmButtonText="Discard annotations"
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>You will lose all annotations.</p>
+      </EuiConfirmModal>
+    );
+  }
+
+
   if (!hasSuccessfullImport) {
     return <p>Something went wrong with the import. Please try again.</p>;
   } else {
@@ -241,7 +304,37 @@ export default () => {
                       </EuiToolTip>
                     </EuiFlexItem>
 
-                    <EuiFlexItem></EuiFlexItem>
+
+                    <EuiFlexItem>
+                        {ontologyList == "maelstrom" &&
+                            <EuiToolTip
+                        position="top"
+                        content={
+                          <p>
+                            Automatically annotate all items with a Maelstrom Taxonomy suggestion (may take a while).
+                          </p>
+                        }
+                      >
+                        <EuiButton
+                            onClick={() => autoAnno()}
+                        >Auto annotation</EuiButton>
+                        </EuiToolTip>
+                        }
+                        {isLoadingAutoAnno &&  <EuiLoadingSpinner/>}
+
+                    </EuiFlexItem>
+
+                      <EuiFlexItem>
+                        <EuiButton
+                            color={'danger'}
+                            iconType={'trash'}
+                            onClick={showDestroyModal}
+                            // onClick={() => deleteAllAnnotations()}
+                        >Delete all annotations</EuiButton>
+                    </EuiFlexItem>
+
+                      {destroyModal}
+
 
                     <EuiFlexItem>
                       <EuiCallOut color="warning" iconType="help">
