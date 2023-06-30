@@ -80,7 +80,9 @@ export default () => {
                         createItem('Search'),
                         createItem('Suggestion'),
                         createItem('Add annotation'),
-                        createItem('Metadata of Code System Elements')
+                        createItem('Metadata of Code System Elements'),
+                        createItem('Delete all annotations'),
+                        createItem('Automatic annotation')
                     ]
                 }),
                 createItem('Export')
@@ -112,7 +114,7 @@ export default () => {
                                 service can be found{" "}
                                 <EuiNavigationLink to="/about">here</EuiNavigationLink>.
                                 This Workbench is intended to be used for metadata annotation at variable level.
-                                The variables to annotate have to be listed in a column of an Excel Spreadsheet.
+                                The variables to annotate have to be listed in a column of an Excel Spreadsheet or CSV.
                                 A usual workflow would be the following: Import the file and select the column with
                                 the variables. Also select a code system from the provided list for reference of the
                                 annotations. Annotate the variables with the provided user interface. Export the
@@ -382,6 +384,26 @@ export default () => {
                                 alt={"metadata"}
                             />
 
+                            <EuiSpacer size="m"/>
+                            <EuiText id='Delete all annotations'><h3>Delete all annotations</h3></EuiText>
+                            <EuiSpacer size="s"/>
+                            <EuiText>
+                                <p>
+                                    Delete all annotations at once. Cannot be undone!
+                                </p>
+                            </EuiText>
+
+                            <EuiSpacer size="m"/>
+                            <EuiText id='Automatic annotation'><h3>Automatic annotation</h3></EuiText>
+                            <EuiSpacer size="s"/>
+                            <EuiText>
+                                <p>
+                                    Automatically annotate all data items/questions with a Maelstrom Taxonomy suggestion.
+                                    The Maelstrom suggestion with the highest confidence score is automatically selected.
+                                    Items/questions already annotated are skipped. Cannot be undone!
+                                </p>
+                            </EuiText>
+
                             <EuiSpacer size="xxl"/>
 
 
@@ -394,6 +416,8 @@ export default () => {
                                     The project can be exported as Excel Spreadsheets or CSV.
                                     Annotations are included as separate columns.
                                     The different export options vary in compositions of the columns and information.
+                                    The <i>labels only</i> option enables export of questions and corresponding annotations
+                                    without data from the original data file.
                                 </p>
                                 <p><b>Default:</b> Label (e.g. <i>Age (qualifier value)</i>), ID (e.g. <i>397669002</i>), IRI (e.g. <i>http://snomed.info/id/397669002</i>) and ontology (e.g. <i>snomed</i>) in separate columns</p>
                                 <p><b>Maelstrom OPAL:</b> Maelstrom domain (e.g. Mlstr_area::Sociodemographic_economic_characteristics) as column header, Maelstrom tag (e.g. Age) in column cell. Only available for annotations with the Maelstrom taxonomy!</p>

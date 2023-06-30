@@ -82,7 +82,7 @@ export default () => {
         <ExportDropDown onChange={setExportForm} options={optionsForm} title={"File form"} type={exportForm}/>
         <EuiSpacer />
         <EuiSwitch
-        label="only labels"
+        label="labels only"
         checked={exportOnlyAnnotations}
         onChange={(e) => setExportOnlyAnnotations(e.target.checked)}
       />
