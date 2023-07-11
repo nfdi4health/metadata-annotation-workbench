@@ -353,7 +353,7 @@ def create_app(test_config=None):
                     export_document_name = "doc.csv"
                     export_df.to_csv(os.path.join(export_folder, export_document_name), index=False)
 
-            return send_from_directory(directory="../" + export_folder, path=export_document_name, as_attachment=True)
+            return send_from_directory(directory=export_folder, path=export_document_name, as_attachment=True)
 
     @app.route('/api/stats/', methods=['GET'])
     def stats_documents():
