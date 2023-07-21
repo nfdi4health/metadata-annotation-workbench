@@ -1,20 +1,25 @@
 import os
+import uuid
+
+from parser import ParserError
 
 import pandas as pd
 import requests
 from flask import Flask, send_from_directory
-from flask import jsonify, request, json
+from flask import jsonify, request, json, abort
 from flask_cors import CORS
 from sqlalchemy import insert
 from urllib.parse import quote
 
 from restapi.models import db
 from restapi.models.models import Item, AnswerOption, Instrument, Code
-from restapi.services.exporter.export_maelstrom import export_maelstrom
+from restapi.services.exporter.export_maelstrom import \
+    export_maelstrom_annotations_opal, export_maelstrom_annotations_opal_only_annotations
 from restapi.services.exporter.export_questionnaire import db_to_fhirJson, db_to_df
-from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations
+from restapi.services.exporter.export_xlsx import get_original_xlsx_and_annotations, \
+    export_maelstrom_annotations_simple, export_maelstrom_annotations_simple_only_annotations, get_only_annotations
 from restapi.services.filter_search_results import filter_class, filter_maelstrom_domains, filter_ontology_information
-from restapi.services.importer.import_excel import single_column_to_db
+from restapi.services.importer.import_xlsx_and_csv import single_column_to_db
 from restapi.services.importer.import_maelstrom import import_maelstrom
 from restapi.services.importer.import_questionnaire import questionnaire_to_db
 from restapi.database import init_db, session, engine
@@ -37,7 +42,8 @@ def create_app(test_config=None):
     db.init_app(app)
 
     ols = os.environ.get('API_SEMLOOKP')
-    instruments = os.environ.get('INSTRUMENTS')
+    INSTRUMENTS = os.environ.get('INSTRUMENTS')
+    API_PREDICT = os.environ.get('API_PREDICT')
 
     @app.teardown_appcontext
     def shutdown_session(exception=None):
@@ -174,7 +180,6 @@ def create_app(test_config=None):
         payload = {'q': quote(quote(q, safe='~()*!\''), safe='~()*!\'')}
         r = requests.get(ols + 'ontologies/terms/', params=payload)
         obj = r.json()
-        print(obj)
 
         return(obj["_embedded"]["terms"][0]["label"])
 
@@ -185,7 +190,6 @@ def create_app(test_config=None):
         payload = {'q': quote(quote(q, safe='~()*!\''), safe='~()*!\'')}
         r = requests.get(ols + 'ontologies/terms/', params=payload)
         obj = r.json()
-        print(obj)
 
         return (obj["_embedded"]["terms"][0]["label"])
 
@@ -205,50 +209,87 @@ def create_app(test_config=None):
                                })
         return jsonify([c for c in ontologies])
 
-    @app.route('/api/columns', methods=["POST"])
+    @app.route('/api/instrument/columns', methods=["POST"])
     def get_columns():
-        if not os.path.exists(instruments):
-            os.makedirs(instruments)
-        importFile = request.files.get("file", None)
-        importFile.save(os.path.join(instruments, importFile.filename))
-        df = pd.read_excel(os.path.join(instruments, importFile.filename))
+        file_to_import = request.files.get("file", None)
+
+        if not os.path.exists(INSTRUMENTS + "/tmp"):
+            os.makedirs(INSTRUMENTS + "/tmp")
+
+        file_to_import.save(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+
+        if file_to_import.filename.split(".")[-1] == "xlsx":
+            df = pd.read_excel(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+        if file_to_import.filename.split(".")[-1] == "csv":
+            df = pd.read_csv(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+
+        try:
+            os.remove(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+        except OSError:
+            pass
+
         return jsonify(list(df.columns.values))
 
     @app.route('/api/instrument', methods=["POST"])
     def import_instrument():
-        project_name = request.args.get('projectId', type=str)
-        importFile = request.files.get("file", None)
-        col = request.args.get("col", None)
+        project_id = request.args.get('projectId', type=str)
+        file_to_import = request.files.get("file", None)
+        column_to_annotate = request.args.get("col", None)
 
-        d = json.loads(col)
-        exists = db.session.query(Instrument.name).filter_by(name=project_name).first() is not None
+        original_filename = os.path.join(file_to_import.filename)
+        file_to_import.save(os.path.join(INSTRUMENTS, original_filename))
+        file_id = uuid.uuid1()
+        unique_filename = os.path.join(str(file_id) + "." + file_to_import.filename.split(".")[-1])
+
+        try:
+            os.rename(os.path.join(INSTRUMENTS, original_filename), os.path.join(INSTRUMENTS, unique_filename))
+        except OSError:
+            pass
+
+        dict_column_to_annotate = json.loads(column_to_annotate)
+        exists = db.session.query(Instrument.name).filter_by(name=project_id).first() is not None
         if exists:
             return jsonify("success")
         else:
-            if not os.path.exists(instruments):
-                os.makedirs(instruments)
+            if original_filename.split(".")[-1] == "xlsx":
+                instrument_type = "xlsx"
+                df = pd.read_excel(os.path.join(INSTRUMENTS, unique_filename))
+            if original_filename.split(".")[-1] == "csv":
+                instrument_type = "csv"
+                df = pd.read_csv(os.path.join(INSTRUMENTS, unique_filename))
 
-            importFile.save(os.path.join(instruments, importFile.filename))
-            file_name = os.path.join(instruments, importFile.filename)
-            if importFile.filename.split(".")[-1] == "xlsx":
-                q = single_column_to_db(file_name, project_name, d[0]['label'], importFile.filename)
+            q = single_column_to_db(df, project_id, dict_column_to_annotate[0]['label'], original_filename, instrument_type, unique_filename)
 
-                session.add(q)
-                session.commit()
-                return jsonify("success")
+            session.add(q)
+            session.commit()
+            return jsonify("success")
+
+
+    def read_file(original_file_format, instrument):
+        if original_file_format == "xlsx":
+            df = pd.read_excel(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        elif original_file_format == "csv":
+            df = pd.read_csv(os.path.join(INSTRUMENTS, instrument[0].unique_name))
+        else:
+            return jsonify({"error": "No supported format available. Please contact the software developer."})
+        return df
 
     @app.route('/api/instrument', methods=["GET"])
     def export_file():
         project_name = request.args.get('projectName', type=str)
-        format = request.args.get('format', type=str)
+        export_form = request.args.get('exportForm', type=str)
+        export_format = request.args.get('exportFormat', type=str)
+        export_only_annotations = request.args.get('exportOnlyAnnotations', type=str)
 
         instrument = db.session.query(Instrument).filter_by(name=project_name).all()
         questions = db.session.query(Item).filter_by(instrument_name=project_name).all()
         answers = db.session.query(AnswerOption).filter_by(instrument_name=project_name).all()
         codes = db.session.query(Code).filter_by(instrument_name=project_name).all()
 
-        if not format:
-            return jsonify("no format")
+        original_file_format = instrument[0].original_name.split(".")[-1]
+
+        if not export_form and export_format:
+            return jsonify({"error": "Unknown parameter. Please contact the software developer."})
         else:
             # if format == "json":
             #     if instrument[0].instrument_type == 'questionnaire':
@@ -256,22 +297,63 @@ def create_app(test_config=None):
             #     else:
             #         return jsonify("not implemented yet")
 
-            if format == "xlsxOpal":
-                df = export_maelstrom(instrument, questions, codes, instruments)
-            elif format == "xlsx":
-                df = get_original_xlsx_and_annotations(instrument, questions, codes, instruments)
+            if export_form == "opal":
+                if export_only_annotations == "true":
+                    export_df = export_maelstrom_annotations_opal_only_annotations(questions, codes)
+                else:
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = export_maelstrom_annotations_opal(df, instrument, questions, codes)
+            elif export_form == "default":
+                if export_only_annotations == "true":
+                    export_df = get_only_annotations(questions, codes)
+                else:
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = get_original_xlsx_and_annotations(df, instrument, questions, codes)
+            elif export_form == "simple":
+                if export_only_annotations == "true":
+                    export_df = export_maelstrom_annotations_simple_only_annotations(questions, codes)
+                else:
+                    try:
+                        df = read_file(original_file_format, instrument)
+                    except:
+                        abort(500, description="Error reading the original file.")
+                    else:
+                        export_df = export_maelstrom_annotations_simple(df, instrument, questions, codes)
             else:
-                return jsonify("This format is not supported")
+                return jsonify({"error": "Unknown form. Please contact the software developer."})
 
-            if not os.path.exists("tmp"):
-                os.mkdir("tmp")
+            export_folder = os.path.join(INSTRUMENTS, "export")
+            if os.path.exists(export_folder):
+                for filename in os.listdir(export_folder):
+                    file_path = os.path.join(export_folder, filename)
+                    try:
+                        if os.path.isfile(file_path):
+                            os.unlink(file_path)
+                    except Exception as e:
+                        print('Failed to delete %s. Reason: %s' % (file_path, e))
 
-            if isinstance(df, str):
-                return("This format is not supported")
+            if not os.path.exists(export_folder):
+                os.makedirs(export_folder)
+
+            if isinstance(export_df, str):
+                return jsonify({"error": "Error during converting the file. Please contact the software developer."})
             else:
-                df.to_excel("tmp/document.xlsx", index=False)
+                if export_format == "xlsx":
+                    export_document_name = "doc.xlsx"
+                    export_df.to_excel(os.path.join(export_folder, export_document_name), index=False)
+                elif export_format == "csv":
+                    export_document_name = "doc.csv"
+                    export_df.to_csv(os.path.join(export_folder, export_document_name), index=False)
 
-            return send_from_directory(directory="../tmp", path="document.xlsx", as_attachment=True)
+            return send_from_directory(directory=export_folder, path=export_document_name, as_attachment=True)
 
     @app.route('/api/stats/', methods=['GET'])
     def stats_documents():
@@ -284,5 +366,53 @@ def create_app(test_config=None):
         project_name = request.args.get('projectName', type=str)
         instrument = db.session.query(Instrument).filter_by(name=project_name).all()
         return jsonify(instrument[0].instrument_type)
+
+    @app.route('/api/prediction/predict', methods=['GET'])
+    def get_predictions():
+        variable = request.args.get('variable', type=str)
+        r = requests.get(API_PREDICT + "/predict?variable=" + variable)
+        result = r.json()["prediction"][:5]
+        return result
+
+    @app.route('/api/auto-annotation', methods=['GET'])
+    def auto_annotation():
+        projectId = request.args.get('projectId', type=str)
+        query = db.session.query(Item).filter_by(instrument_name=projectId).all()
+
+        isInDB = False
+
+        list_of_dicts = [c.as_dict() for c in query]
+
+        for dic in list_of_dicts:
+            req = requests.get(API_PREDICT + "/predict?variable=" + dic["text"])
+            prediction = req.json()["prediction"][:1]
+            prediction_iri = prediction[0]["iri"]
+
+            query_code = db.session.query(Code).filter_by(instrument_name=projectId) \
+                .filter_by(code_linkId=dic["linkId"]).all()
+            codes = [c.as_dict() for c in query_code]
+            for element in codes:
+                if prediction_iri == element["code"]:
+                    return jsonify('isInDB')
+            if not isInDB:
+                stmt = (
+                    insert(Code).
+                    values(code_linkId=dic["linkId"], code=prediction_iri, instrument_name=projectId)
+                )
+                session.execute(stmt)
+                session.commit()
+        return
+
+    @app.route('/api/annotations', methods=['DELETE'])
+    def remove_all_annotations():
+        projectId = request.args.get('projectId', type=str)
+
+        if projectId:
+            session.query(Code).filter_by(instrument_name=projectId) \
+                .delete()
+            session.commit()
+
+        return projectId
+
 
     return app

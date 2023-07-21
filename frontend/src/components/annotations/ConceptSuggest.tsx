@@ -2,63 +2,60 @@ import { useQuery, useQueryClient } from "react-query";
 import {
     EuiCallOut,
     EuiCard,
-    EuiFieldSearch,
     EuiFlexGroup,
     EuiFlexItem,
     EuiLoadingSpinner,
     EuiPanel,
     EuiSpacer,
     EuiText,
-    EuiToolTip,
 } from "@elastic/eui";
 import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
 import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
 import CustomEuiTable from './CustomEuiTable'
-import { Question } from '../../pages/AnnotationPage'
 import { useParams } from 'react-router-dom'
 
-export interface ConceptSearchProps {
+export default (props: {
     currentDataItem: {
-        currentDataItemId: number,
-        projectId: string,
-        text: string,
-    }
-    addAnnotation: Function;
-    selectedItems?: Question[];
-    ontologyList?: string;
-}
+        currentDataItemId: number;
+        projectId: string;
+        text: string;
+    };
 
-export default (props: ConceptSearchProps) => {
+    ontologyList: string;
+    addAnnotation: Function;
+}) => {
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [itemsPage, setItemsPage] = useState();
+    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState({});
     const [searchValue, setSearchValue] = useState(props.currentDataItem.text);
     const [viewConcept, setViewConcept] = useState();
     const [currentConcept, setCurrentConcept] = useState<OLSConceptIF>();
     const { ontologyList = "" } = useParams();
 
-    const queryClient = useQueryClient();
-
     const {
         isSuccess,
-        data: searchData,
-        refetch,
+        data: predictions,
         isLoading,
         isError,
     } = useQuery(
-        ["semlookp_search_search", searchValue, props.currentDataItem],
+        ["maelstrom-predictions", searchValue],
         () => {
             return fetch(
-                `/api/ols?q=${searchValue}&ontology=${ontologyList}`
+                `/api/prediction/predict?variable=${searchValue}`
             ).then((result) => result.json());
         }
     );
 
+
     useEffect(() => {
         if (isSuccess) {
-            if (searchData.response.docs) {
+            if (predictions.length > 0) {
                 setCurrentConcept({
-                    iri: searchData.response.docs[0]?.iri,
-                    label: searchData.response.docs[0]?.label,
-                    ontology: searchData.response.docs[0]?.ontology_name,
+                    iri: predictions[0].iri,
+                    label: predictions[0].label,
+                    ontology: "maelstrom",
                 });
             } else {
                 setCurrentConcept({
@@ -68,7 +65,7 @@ export default (props: ConceptSearchProps) => {
                 });
             }
         }
-    }, [searchData]);
+    }, [predictions]);
 
     useEffect(() => {
         setSearchValue(props.currentDataItem.text);
@@ -76,9 +73,9 @@ export default (props: ConceptSearchProps) => {
 
     useEffect(() => {
         if (isSuccess) {
-            setViewConcept(searchData.response.docs[0]?.iri);
+            setViewConcept(predictions[0].iri);
         }
-    }, [searchData]);
+    }, [predictions]);
 
     const viewAnnotation = (item: any) => {
         setViewConcept(item.iri);
@@ -99,7 +96,7 @@ export default (props: ConceptSearchProps) => {
             icon: "plusInCircleFilled",
             type: "icon",
             color: "primary",
-            onClick: (annotationItem: any) => props.addAnnotation(annotationItem, props.selectedItems),
+            onClick: props.addAnnotation,
         },
     ];
 
@@ -115,9 +112,10 @@ export default (props: ConceptSearchProps) => {
             width: "20%",
         },
         {
-            field: "ontology_name",
-            name: "Ontology",
+            field: "confidence",
+            name: "Confidence",
             width: "10%",
+            description: "This confidence score shows the probability of the class being detected correctly by the algorithm and is given as a percentage."
         },
         {
             name: "",
@@ -126,50 +124,16 @@ export default (props: ConceptSearchProps) => {
         },
     ];
 
-    const onSearch = (e: any) => {
-        setSearchValue(e);
-        if (e.length > 3) {
-            queryClient.invalidateQueries("semlookp_search_search");
-            refetch();
-        }
-    };
-    const onInputChange = (e: any) => {
-        setSearchValue(e.target.value);
-    };
-
     return (
         <div>
             <EuiFlexGroup>
                 <EuiFlexItem>
                     <EuiFlexItem>
                         <EuiPanel>
-                            <EuiToolTip
-                                position="top"
-                                content={
-                                    <p>
-                                        The default free text search is across all textual fields in
-                                        the terminologies, but results are ranked towards hits in
-                                        labels, then synonyms, then definitions.
-                                    </p>
-                                }
-                            >
-                                <EuiText>
-                                    <h4>Search</h4>
-                                </EuiText>
-                            </EuiToolTip>
-
+                            <EuiText>
+                                <h4>Suggestion</h4>
+                            </EuiText>
                             <EuiSpacer size="m"/>
-                            <EuiFieldSearch
-                                placeholder={props.currentDataItem.text}
-                                value={searchValue}
-                                onChange={(e) => onInputChange(e)}
-                                onSearch={(e) => onSearch(e)}
-                                incremental
-                                isClearable
-                            />
-
-                            <EuiSpacer/>
-
                             {isLoading && <EuiLoadingSpinner size="xl"/>}
 
                             {isError && (
@@ -184,16 +148,17 @@ export default (props: ConceptSearchProps) => {
                                     </p>
                                 </EuiCallOut>
                             )}
-
-                            {isSuccess && searchData.response.docs &&
+                            {isSuccess &&
                                 <CustomEuiTable
                                     addAnnotation={props.addAnnotation}
                                     columns={columns}
                                     actions={actions}
-                                    data={searchData.response.docs}/>
-                            }
+                                    data={predictions}/>}
                         </EuiPanel>
+
                     </EuiFlexItem>
+                    <EuiSpacer size="m"/>
+
                 </EuiFlexItem>
                 <EuiFlexItem style={{ maxWidth: "50%" }}>
                     <EuiPanel>
@@ -207,8 +172,9 @@ export default (props: ConceptSearchProps) => {
                                 <MetadataWidget
                                     iri={viewConcept}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
-                                    objType={"term"}
-                                    ontologyID={ontologyList.split(',')[0]}/>
+                                    objType={'term'}
+                                    ontologyID={ontologyList.split(',')[0]}
+                                />
                             </EuiCard>
                         )}
                     </EuiPanel>

@@ -59,7 +59,7 @@ export DB_PASSWORD=postgres
 export DB_HOST=localhost
 export API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
 export INSTRUMENTS=instruments
-export API_PREDICT=http://172.29.0.3:5000
+export API_PREDICT=http://172.29.0.5:5000
 flask run
 ```
 

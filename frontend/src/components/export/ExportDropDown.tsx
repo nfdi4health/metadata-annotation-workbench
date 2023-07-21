@@ -6,26 +6,31 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+    EuiSelectOption
 } from "@elastic/eui";
 
-export default (props: { format: string; setFormat: Function }) => {
-  const options = [
-    { value: "xlsx", text: "EXCEL" },
-    { value: "xlsxOpal", text: "Excel Maelstrom for OPAL" },
-  ];
+export interface ExportDropDownProps {
+    options: EuiSelectOption[]
+    title: string
+    onChange: Function
+    type: string
+}
+
+export default (props: ExportDropDownProps) => {
+  const {options, title, onChange, type} = props
 
   return (
     <>
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiPanel paddingSize="l">
-            <EuiText>Select the export format:</EuiText>
+            <EuiText>{title}</EuiText>
             <EuiSpacer />
             <EuiSelect
-              id="selectDocExample"
+              id="exportdropdown"
               options={options}
-              value={props.format}
-              onChange={(e) => props.setFormat(e.target.value)}
+              value={type}
+              onChange={(e) => onChange(e.target.value)}
               aria-label="Use aria labels when no actual label is in use"
             />
           </EuiPanel>
