@@ -1,0 +1,96 @@
+name: Continuous Integration
+
+on:
+  pull_request: { branches: [ "main","develop" ] }
+  push:
+    branches: [ "master","develop" ]
+    tags: [ "*" ]
+env:
+  KUBECONFIG: .kube/config
+  KUBECONFIG_FILE: ${{ secrets.KUBECONFIG }}
+  GIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  build:
+    name: "Build Image"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - id: generate-image-tag
+        name: Generate Image Tag
+        env:
+          ref_name: "${{ github.ref_name }}"
+          head_ref: "${{ github.head_ref }}"
+        run: |
+          head_ref="${head_ref/\//-}"
+          ref_name="${head_ref:-${ref_name/main/latest}}"
+          echo "::set-output name=imageTag::${ref_name#v}"
+      - name: Login to Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Backend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/backend:${{ steps.generate-image-tag.outputs.imageTag }}
+            ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '17.x'
+          registry-url: 'https://npm.pkg.github.com/'
+      - run: npm ci --legacy-peer-deps
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./frontend
+      - run: npm run build
+        env:
+          CI: false
+        working-directory: ./frontend
+      - name: Build and Push Frontend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/frontend:${{ steps.generate-image-tag.outputs.imageTag }}
+            ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}
+  deploy_development:
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+    - id: generate-image-tag
+      name: Generate Image Tag
+      env:
+        ref_name: "${{ github.ref_name }}"
+        head_ref: "${{ github.head_ref }}"
+      run: |
+        head_ref="${head_ref/\//-}"
+        ref_name="${head_ref:-${ref_name/main/latest}}"
+        echo "::set-output name=imageTag::${ref_name#v}"
+    - uses: actions/checkout@v2
+    - run: |
+        mkdir -p .kube
+        echo "${{ env.KUBECONFIG_FILE }}" > $KUBECONFIG
+    - uses: stefanprodan/kube-tools@v1
+      with:
+        helmv3: 3.12.0
+        command: |
+          kubectl get nodes
+          helmv3 repo add mda-deployment https://nfdi4health.github.io/mda-deployment/
+          helmv3 repo update
+          helmv3 upgrade ${{ steps.generate-image-tag.outputs.imageTag }} \
+          --install \
+          --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
+          --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
+          --set-json='images.prediction="ghcr.io/${{ github.repository }}/prediction:${{ github.event.pull_request.head.sha || github.sha }}"'  \
+          --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
+          mda-deployment/metadata-annotation
