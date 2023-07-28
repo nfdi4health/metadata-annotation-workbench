@@ -72,10 +72,11 @@ jobs:
       env:
         ref_name: "${{ github.ref_name }}"
         head_ref: "${{ github.head_ref }}"
+        deployment_name: "mda"
       run: |
         head_ref="${head_ref/\//-}"
         ref_name="${head_ref:-${ref_name/main/latest}}"
-        echo "::set-output name=imageTag::${ref_name#v}"
+        echo "::set-output name=${deployment_name}::imageTag::${ref_name#v}"
     - uses: actions/checkout@v2
     - run: |
         mkdir -p .kube
@@ -91,7 +92,7 @@ jobs:
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
-          --set-json='images.prediction="ghcr.io/${{ github.repository }}/prediction:${{ github.event.pull_request.head.sha || github.sha }}"'  \
+          --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
           mda-deployment/metadata-annotation
   deploy_main:
@@ -104,10 +105,11 @@ jobs:
       env:
         ref_name: "${{ github.ref_name }}"
         head_ref: "${{ github.head_ref }}"
+        deployment_name: "mda"
       run: |
         head_ref="${head_ref/\//-}"
         ref_name="${head_ref:-${ref_name/main/latest}}"
-        echo "::set-output name=imageTag::${ref_name#v}"
+        echo "::set-output name=${deployment_name}::imageTag::${ref_name#v}"
     - uses: actions/checkout@v2
     - run: |
         mkdir -p .kube
@@ -123,6 +125,6 @@ jobs:
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
-          --set-json='images.prediction="ghcr.io/${{ github.repository }}/prediction:${{ github.event.pull_request.head.sha || github.sha }}"'  \
+          --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
           mda-deployment/metadata-annotation
