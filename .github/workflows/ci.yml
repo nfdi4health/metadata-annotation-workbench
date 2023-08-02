@@ -87,7 +87,7 @@ jobs:
           kubectl get nodes
           helmv3 repo add mda-deployment https://nfdi4health.github.io/mda-deployment/
           helmv3 repo update
-          helmv3 upgrade ${{ steps.generate-image-tag.outputs.imageTag }} \
+          helmv3 upgrade mda-${{ steps.generate-image-tag.outputs.imageTag }} \
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
@@ -119,7 +119,7 @@ jobs:
           kubectl get nodes
           helmv3 repo add mda-deployment https://nfdi4health.github.io/mda-deployment/
           helmv3 repo update
-          helmv3 upgrade ${{ steps.generate-image-tag.outputs.imageTag }} \
+          helmv3 upgrade mda-${{ steps.generate-image-tag.outputs.imageTag }} \
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
