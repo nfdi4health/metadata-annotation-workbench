@@ -1,4 +1,5 @@
 import json
+import uuid
 
 import numpy
 import pandas as pd
@@ -6,19 +7,18 @@ import pandas as pd
 from restapi.models.models import AnswerOption, \
     Instrument, Item, Code
 
-def single_column_to_db(file, name, col, original_name):
+def single_column_to_db(df, project_id, column_to_annotate, original_name, instrument_type, unique_name):
     instrument = Instrument()
-    instrument.name = name
+    instrument.name = project_id
     instrument.original_name = original_name
-    instrument.annotation_column = col
-    instrument.instrument_type = 'excel'
+    instrument.unique_name = unique_name
+    instrument.annotation_column = column_to_annotate
+    instrument.instrument_type = instrument_type
     questions = []
     linkId = 1
     row_num = 1
 
-    df = pd.read_excel(file)
-
-    for rowValue in df[col]:
+    for rowValue in df[column_to_annotate]:
         if isinstance(rowValue, str):
             question_item = Item()
             question_item.text = rowValue.replace('"', '')

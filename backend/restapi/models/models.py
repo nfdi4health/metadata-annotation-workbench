@@ -12,6 +12,7 @@ class Instrument(Base):
     original_name = Column(String)
     annotation_column = Column(String)
     instrument_type = Column(String)
+    unique_name = Column(String)
 
     items = relationship("Item")
 

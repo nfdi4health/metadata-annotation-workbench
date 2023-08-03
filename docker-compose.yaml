@@ -4,9 +4,7 @@ services:
     # uncomment for local dev
 #    build: ./frontend
     restart: always
-#    image: github.com/nfdi4health/metadata-annotation-workbench/frontend:${VERSION}
     image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
-
     environment:
       - API_PASS=http://backend:5000
     ports:
@@ -20,18 +18,21 @@ services:
     # uncomment for local dev
 #    build: ./backend
     restart: always
-#    image: github.com/nfdi4health/metadata-annotation-workbench:${VERSION}
-    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
+    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/backend:${VERSION}
     expose:
       - "5000"
     environment:
       - PYTHONPATH=/workspace
       - API_SEMLOOKP=https://semanticlookup.zbmed.de/ols/api/
       - API_OLS=https://www.ebi.ac.uk/ols/api/
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
-      - INSTRUMENTS=/var/lib/mda/instruments
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - INSTRUMENTS=instruments
+      - API_PREDICT=http://prediction:5000
     depends_on:
       - db
+      - prediction
     volumes:
       - instruments:/var/lib/mda/instruments
   db:
@@ -45,6 +46,15 @@ services:
       - ${PORT_DB}:${PORT_DB}
     volumes:
       - db:/var/lib/postgresql/data
+
+  prediction:
+    # uncomment for local dev
+#    build: ./prediction
+    restart: always
+    image: gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe
+    expose:
+      - "5000"
+
 volumes:
   db:
   instruments:
