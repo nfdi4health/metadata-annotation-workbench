@@ -40,8 +40,7 @@ export default (props: { setOntologyList: Function; ontologyList: any }) => {
         </EuiText>
         <EuiCallOut color="warning" iconType="help">
           <p>
-            Please select one ontology only! We are working on a solution for
-            multiple ontology selection.{" "}
+            Multiple ontology selection is an experimental feature and can lead to errors.{" "}
           </p>
         </EuiCallOut>
         {isSuccess && (
