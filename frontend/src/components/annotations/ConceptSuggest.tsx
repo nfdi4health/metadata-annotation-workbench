@@ -172,8 +172,8 @@ export default (props: {
                                 <MetadataWidget
                                     iri={viewConcept}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
-                                    objType={'term'}
-                                    ontologyID={ontologyList.split(',')[0]}
+                                    entityType={'term'}
+                                    ontologyId={ontologyList.split(',')[0]}
                                 />
                             </EuiCard>
                         )}

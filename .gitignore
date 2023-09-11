@@ -888,3 +888,4 @@ frontend/yarn.lock
 
 backend/instruments.db
 instruments.db
+frontend/.npmrc

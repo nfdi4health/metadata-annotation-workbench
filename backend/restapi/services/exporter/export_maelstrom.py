@@ -1,7 +1,7 @@
-import os
+from urllib.parse import quote
+
 import pandas as pd
 import requests
-from urllib.parse import quote
 
 
 def get_codes_for_linkId(linkId, codes):
@@ -11,9 +11,42 @@ def get_codes_for_linkId(linkId, codes):
             codelist.append(ele.code)
     return codelist
 
+
+def get_all_domains():
+    # TODO code does only returns 14 of 18 domains
+    # TODO add Maelstrom Additionals
+    url = "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms?size=500"
+    response = requests.get(url).json()
+    all_domains = ["Mlstr_area::" + domain["synonyms"][0].replace(' ', '_') for domain in response["_embedded"]["terms"]
+                   if (domain["synonyms"] is not None and domain["is_root"])]
+    return [
+        'Mlstr_area::Symptoms_signs',
+        'Mlstr_area::Non_pharmacological_interventions',
+        'Mlstr_area::Health_community_care_utilization',
+        'Mlstr_area::Sociodemographic_economic_characteristics',
+        'Mlstr_area::Social_environment',
+        'Mlstr_area::Medication_supplements',
+        'Mlstr_area::Preschool_school_work',
+        'Mlstr_area::Life_events_plans_beliefs',
+        'Mlstr_area::Lifestyle_behaviours',
+        'Mlstr_area::Cognitive_psychological_measures',
+        'Mlstr_area::End_of_life',
+        'Mlstr_area::Physical_measures',
+        'Mlstr_area::Health_status_functional_limitations',
+        'Mlstr_area::Reproduction',
+        'Mlstr_area::Diseases',
+        'Mlstr_area::Laboratory_measures',
+        'Mlstr_area::Physical_environment',
+        'Mlstr_area::Administrative_information',
+    ]
+
+
 def export_maelstrom_annotations_opal(df, instrument, questions, codes):
-    # df = pd.read_excel(os.path.join(instruments, instrument[0].original_name))
-    # df = df.reset_index()
+    all_domains = get_all_domains()
+
+    # add all domains to df
+    df = pd.concat([df, pd.DataFrame(columns=all_domains)])
+
     for index, row in df.iterrows():
         annotation_col = instrument[0].annotation_column
         if isinstance(row[annotation_col], str):
@@ -29,11 +62,19 @@ def export_maelstrom_annotations_opal(df, instrument, questions, codes):
                         response = requests.get(url).json()
 
                         if response["_embedded"]["terms"][0]["ontology_name"] != "maelstrom":
-                            return("Not a maelstrom concept")
+                            return ("Not a maelstrom concept")
 
-                        label = response["_embedded"]["terms"][0]["label"]
-                        response_parent = requests.get("https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
-                        label_parent = response_parent["_embedded"]["terms"][0]["label"]
+                        if (response["_embedded"]["terms"][0]["synonyms"] is None):
+                            label = response["_embedded"]["terms"][0]["label"]
+                        else:
+                            label = response["_embedded"]["terms"][0]["synonyms"][0].replace(' ', '_')
+
+                        response_parent = requests.get(
+                            "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
+                        if(response_parent["_embedded"]["terms"][0]["synonyms"] is None):
+                            label_parent = response_parent["_embedded"]["terms"][0]["label"].replace(' ', '_')
+                        else:
+                            label_parent = response_parent["_embedded"]["terms"][0]["synonyms"][0].replace(' ', '_')
 
                         maelstrom_prefix = "Mlstr_area::"
 
@@ -42,8 +83,8 @@ def export_maelstrom_annotations_opal(df, instrument, questions, codes):
     df = df[df.filter(regex='^(?!Unnamed)').columns]
     return df
 
-def export_maelstrom_annotations_opal_only_annotations(questions, codes):
 
+def export_maelstrom_annotations_opal_only_annotations(questions, codes):
     df = pd.DataFrame(columns=['label'])
 
     for q in questions:
@@ -57,10 +98,11 @@ def export_maelstrom_annotations_opal_only_annotations(questions, codes):
             response = requests.get(url).json()
 
             if response["_embedded"]["terms"][0]["ontology_name"] != "maelstrom":
-                return("Not a maelstrom concept")
+                return ("Not a maelstrom concept")
 
             label = response["_embedded"]["terms"][0]["label"]
-            response_parent = requests.get("https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
+            response_parent = requests.get(
+                "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
             label_parent = response_parent["_embedded"]["terms"][0]["label"]
 
             maelstrom_prefix = "Mlstr_area::"

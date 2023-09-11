@@ -7,9 +7,9 @@ import ExportDropDown from './ExportDropDown'
 
 export default () => {
   const { projectId } = useParams();
-  const [exportForm, setExportForm] = useState("default");
+  const [exportForm, setExportForm] = useState("opal");
   const [exportFormat, setExportFormat] = useState("xlsx");
-  const [exportOnlyAnnotations, setExportOnlyAnnotations] = useState<boolean>(true);
+  const [exportOnlyAnnotations, setExportOnlyAnnotations] = useState<boolean>(false);
 
   const mutation_export_json = useMutation(() => {
     return fetch(
