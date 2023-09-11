@@ -44,11 +44,44 @@ export default (props: {
         }).then((res) => res.json());
     });
 
+    const {
+        data: columnCheck,
+        mutate: checkColumns,
+        isSuccess: isSuccessColumnCheck,
+        isLoading: isLoadingColumnCheck,
+        isError: isErrorColumnCheck
+    } = useMutation(() => {
+        const file = new FormData();
+        file.append("file", props.files);
+        return fetch(`/api/instrument/columnCheck`, {
+            method: "POST",
+            body: file,
+        }).then((res) => res.json());
+    });
+
     const pick = () => {
         if (props.hasFile) {
             get_columns();
         }
     };
+
+    const check_columns = () => {
+        if (props.hasFile) {
+            checkColumns();
+        }
+    };
+
+    const displayColumnCheck = (item: any) => {
+        return (
+            item ?
+                item.length > 1 ?
+                    item.map((element: string, i: any) =>
+                        <dd key={i}>{element}</dd>)
+                    : item
+                : "-"
+        )
+    }
+    console.log(columnCheck)
 
     return (
         <>
@@ -94,6 +127,8 @@ export default (props: {
                         <EuiButton
                             onClick={() => {
                                 pick();
+                                check_columns()
+                                console.log(columnCheck)
                             }}
                             isDisabled={!props.hasFile}
                         >
@@ -104,6 +139,14 @@ export default (props: {
                         {isError &&
                             <EuiTextColor color="danger">The file could not be validated. Try again, use another format
                                 or report via the blue feedback button.</EuiTextColor>}
+                        {isLoadingColumnCheck && <EuiLoadingSpinner/>}
+
+                        {columnCheck && columnCheck.length == 0 &&
+                            <EuiTextColor color="success">OPAL format validated</EuiTextColor>
+                        }
+                        {columnCheck && columnCheck.length != 0 &&
+                            <EuiTextColor color="danger">The following columns are required for the OPAL
+                                format: {displayColumnCheck(columnCheck)}</EuiTextColor>}
                     </>
                 </EuiFormRow>
             </EuiDescribedFormGroup>

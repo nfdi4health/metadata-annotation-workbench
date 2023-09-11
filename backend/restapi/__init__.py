@@ -228,7 +228,33 @@ def create_app(test_config=None):
         except OSError:
             pass
 
-        return jsonify(list(df.columns.values))
+        return(jsonify(list(df.columns.values)))
+
+    @app.route('/api/instrument/columnCheck', methods=["POST"])
+    def column_check():
+        file_to_import = request.files.get("file", None)
+
+        if not os.path.exists(INSTRUMENTS + "/tmp"):
+            os.makedirs(INSTRUMENTS + "/tmp")
+
+        file_to_import.save(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+
+        if file_to_import.filename.split(".")[-1] == "xlsx":
+            df = pd.read_excel(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+        if file_to_import.filename.split(".")[-1] == "csv":
+            df = pd.read_csv(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+
+        required_opal_columns = ["index", "table", "name", "valueType", "unit", "label:en", "label:la", "label:de",
+                                 "alias"]
+        actual_columns = df.columns.values
+        missing_columns = [i for i in required_opal_columns if i not in actual_columns]
+
+        try:
+            os.remove(INSTRUMENTS + "/tmp/" + file_to_import.filename)
+        except OSError:
+            pass
+
+        return(jsonify(missing_columns))
 
     @app.route('/api/instrument', methods=["POST"])
     def import_instrument():
