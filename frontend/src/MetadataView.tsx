@@ -32,8 +32,8 @@ export const MetadataView = (props: TermWidgetProps) => {
             <MetadataWidget
                 iri={props.iri}
                 api={"https://semanticlookup.zbmed.de/ols/api/"}
-                objType={'term'}
-                ontologyID={ontologyList.split(',')[0]}/>
+                entityType={'term'}
+                ontologyId={ontologyList.split(',')[0]}/>
         </div>
     );
 };
