@@ -417,16 +417,25 @@ def create_app(test_config=None):
             query_code = db.session.query(Code).filter_by(instrument_name=projectId) \
                 .filter_by(code_linkId=dic["linkId"]).all()
             codes = [c.as_dict() for c in query_code]
-            for element in codes:
-                if prediction_iri == element["code"]:
-                    return jsonify('isInDB')
-            if not isInDB:
+            if(len(codes) > 0):
+                for element in codes:
+                    if prediction_iri == element["code"]:
+                        isInDB = True
+                    if not isInDB:
+                        stmt = (
+                            insert(Code).
+                            values(code_linkId=dic["linkId"], code=prediction_iri, instrument_name=projectId)
+                        )
+                        session.execute(stmt)
+                        session.commit()
+            else:
                 stmt = (
                     insert(Code).
                     values(code_linkId=dic["linkId"], code=prediction_iri, instrument_name=projectId)
                 )
                 session.execute(stmt)
                 session.commit()
+
         return
 
     @app.route('/api/annotations', methods=['DELETE'])

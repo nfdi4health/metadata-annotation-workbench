@@ -81,7 +81,6 @@ export default (props: {
                 : "-"
         )
     }
-    console.log(columnCheck)
 
     return (
         <>
@@ -128,7 +127,6 @@ export default (props: {
                             onClick={() => {
                                 pick();
                                 check_columns()
-                                console.log(columnCheck)
                             }}
                             isDisabled={!props.hasFile}
                         >
