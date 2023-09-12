@@ -173,6 +173,7 @@ def create_app(test_config=None):
 
         return obj
 
+    # deprecated
     @app.route('/api/ols/term', methods=["GET"])
     def api_ols_term():
         q = request.args.get('iri', type=str)
@@ -448,6 +449,23 @@ def create_app(test_config=None):
             session.commit()
 
         return projectId
+
+    @app.route('/api/maelstrom-domain', methods=["GET"])
+    def get_is_Maelstrom_domain():
+        iri = request.args.get('iri', type=str)
+        ontology = request.args.get('ontology', type=str)
+        iri_encoded = quote(quote(iri, safe='~()*!\''), safe='~()*!\'')
+        url = (ols + 'ontologies/maelstrom/terms/' + iri_encoded + "/parents")
+
+        if ontology == "maelstrom":
+            response_parent = requests.get(url).json()
+            if response_parent["_embedded"]["terms"][0]["label"] == "Thing":
+                return jsonify("True")
+            else:
+                return jsonify("False")
+        else:
+            return jsonify("False")
+
 
 
     return app

@@ -1,20 +1,7 @@
 import { useQuery, useQueryClient } from "react-query";
-import {
-    EuiCallOut,
-    EuiCard,
-    EuiFieldSearch,
-    EuiFlexGroup,
-    EuiFlexItem,
-    EuiLoadingSpinner,
-    EuiPanel,
-    EuiSpacer,
-    EuiText,
-    EuiToolTip,
-} from "@elastic/eui";
-import React, { useEffect, useState } from "react";
-import { OLSConceptIF } from "../../api";
+import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiToolTip, } from "@elastic/eui";
+import React, { useState } from "react";
 import { AutocompleteWidget, MetadataWidget } from "@nfdi4health/semlookp-widgets";
-import CustomEuiTable from './CustomEuiTable'
 import { Question } from '../../pages/AnnotationPage'
 import { useParams } from 'react-router-dom'
 
@@ -38,13 +25,37 @@ interface SelectedEntity {
 
 export default (props: ConceptSearchProps) => {
     const { ontologyList = "" } = useParams();
-    const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({iri: "", label: "", ontology_name:"", entityType: ""})
-
-    const queryClient = useQueryClient();
+    const [selectedEntity, setSelectedEntity] = useState<SelectedEntity>({
+        iri: "",
+        label: "",
+        ontology_name: "",
+        entityType: ""
+    })
+    const [isMaelstromDomain, setIsMaelstromDomain] = useState<boolean>(false)
 
     const onInputChange = (e: any) => {
-        setSelectedEntity(e);
+        setSelectedEntity(
+            {
+                iri: e.iri,
+                label: e.label,
+                ontology_name: e.ontology_name,
+                entityType: e.type
+            });
     };
+
+    const {
+        isSuccess,
+        data: maelstromDomainInfo
+    } = useQuery({
+        queryKey: ["maelstromDomainInfo", selectedEntity.iri],
+        queryFn: () => {
+            return fetch(
+                `/api/maelstrom-domain?iri=${selectedEntity.iri}&ontology=${selectedEntity.ontology_name}`
+            ).then((result) => result.json()
+                .then((result) => setIsMaelstromDomain(result == "False" ? false : true)))
+        },
+        enabled: selectedEntity.iri != ""
+    });
 
     return (
         <div>
@@ -78,6 +89,11 @@ export default (props: ConceptSearchProps) => {
                                 hasShortSelectedLabel={true}
                             />
                             <EuiSpacer/>
+                            {isSuccess && selectedEntity.iri != "" &&
+                                <EuiButton
+                                    isDisabled={isMaelstromDomain}
+                                    onClick={() => props.addAnnotation(selectedEntity)}
+                                >Add Annotation</EuiButton>}
 
                         </EuiPanel>
                     </EuiFlexItem>
@@ -94,8 +110,8 @@ export default (props: ConceptSearchProps) => {
                                 <MetadataWidget
                                     iri={selectedEntity.iri}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
-                                    entityType={selectedEntity.entityType}
-                                    ontologyId={ontologyList.split(',')[0]}
+                                    entityType={selectedEntity.entityType == "class" ? "term" : selectedEntity.entityType}
+                                    ontologyId={selectedEntity.ontology_name}
                                 />
                             </EuiCard>
                         )}
