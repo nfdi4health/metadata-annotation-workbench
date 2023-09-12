@@ -11,6 +11,7 @@ def filter_class(obj):
                     del obj['response']['docs'][i]
     return obj
 
+# deprecated
 def filter_maelstrom_domains(obj):
     if obj:
         if len(obj['response']['docs']) != 0:
