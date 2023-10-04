@@ -33,5 +33,4 @@ jobs:
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
           --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
-          --set-json='ingress.dns="mda-prod.prod.km.k8s.zbmed.de"'  \
           mda-deployment/metadata-annotation
