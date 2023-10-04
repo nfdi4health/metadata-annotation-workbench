@@ -28,7 +28,7 @@ jobs:
         command: |
           helmv3 repo add mda-deployment https://nfdi4health.github.io/mda-deployment/
           helmv3 repo update
-          helmv3 upgrade mda-main  \
+          helmv3 upgrade mda-prod  \
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
