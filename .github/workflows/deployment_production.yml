@@ -34,4 +34,6 @@ jobs:
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
           --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
           --set-json='ingress.dns="mda.nfdi4health.de"'  \
+          --set-json='ingress.enableSSL="true"'  \
+          --set-json='ingress.certIssuer="letsencrypt-prod"'  \
           mda-deployment/metadata-annotation

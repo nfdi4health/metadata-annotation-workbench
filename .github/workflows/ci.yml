@@ -93,6 +93,7 @@ jobs:
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
           --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
+          --set-json='ingress.enableSSL="false"'  \
           mda-deployment/metadata-annotation
   deploy_main:
     needs: build
@@ -125,4 +126,5 @@ jobs:
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
           --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
+          --set-json='ingress.enableSSL="false"'  \
           mda-deployment/metadata-annotation
