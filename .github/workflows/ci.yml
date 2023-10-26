@@ -91,7 +91,7 @@ jobs:
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
-          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:6b3b4495946f421da48e147783ba508b095396b4"'  \
+          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:44a712a68697ce7d8dc544b7fd15cf0dd99e1d22"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
           mda-deployment/metadata-annotation
   deploy_main:
@@ -123,6 +123,6 @@ jobs:
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
-          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:6b3b4495946f421da48e147783ba508b095396b4"'  \
+          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:44a712a68697ce7d8dc544b7fd15cf0dd99e1d22"'  \
           --set-json='ingress.dns="${{ steps.generate-image-tag.outputs.imageTag }}.mda.qa.km.k8s.zbmed.de"'  \
           mda-deployment/metadata-annotation
