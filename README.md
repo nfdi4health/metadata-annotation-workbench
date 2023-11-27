@@ -1,6 +1,6 @@
 # Metadata Annotation Workbench
 This Metadata Annotation Workbench supports standardised metadata 
-annotation of variable catalogues in the Excel Spreadsheet format with standardised terminologies from the Semantic Lookup Platform [SemLookP](https://semanticlookup.zbmed.de/ols/index).
+annotation of variable catalogues in the Excel Spreadsheet and CSV formats with standardised terminologies from the Semantic Lookup Platform [SemLookP](https://semanticlookup.zbmed.de/ols/index).
 
 
 ## Table of contents
