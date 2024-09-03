@@ -32,7 +32,7 @@ jobs:
           --install \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.frontend="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
-          --set-json='images.prediction="gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe"'  \
+          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:44a712a68697ce7d8dc544b7fd15cf0dd99e1d22"'  \
           --set-json='ingress.dns="mda.nfdi4health.de"'  \
           --set-json='ingress.enableSSL="true"'  \
           --set-json='ingress.certIssuer="letsencrypt-prod"'  \
