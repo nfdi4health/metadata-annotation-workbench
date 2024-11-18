@@ -37,6 +37,7 @@ docker-compose --env dev.env up db
 ```
 docker-compose --env dev.env up prediction
 ```
+Hint: It needs some time to download the data model after starting the Docker container.
 
 #### Install the virtual environment and requirements
 ```
@@ -62,7 +63,7 @@ export INSTRUMENTS=instruments
 export API_PREDICT=http://172.29.0.5:5000
 flask run
 ```
-
+Eventually you have to adapt the API_PREDICT variable. Find the IP address by running `docker inspect annobench_prediction_1`.
 
 Start the frontend:
 ```
@@ -77,6 +78,9 @@ Create production build for all services:
 Uncomment `build: ./frontend` and `build: ./backend` in `docker-compose.yaml` and run:
 
 ```
+cd frontend
+npm run build
+cd ..
 docker-compose --env-file dev.env build
 docker-compose --env-file dev.env up
 ```
@@ -85,6 +89,9 @@ The frontend service is available at http://localhost:8090/.
 
 To stop a production build of all services:
 `docker-compose --env-file dev.env down`
+
+## AI model
+Check out https://github.com/nfdi4health/workbench-AI-model 
 
 ## License
 The project is [MIT](LICENSE) licensed.

@@ -4,7 +4,7 @@ services:
     # uncomment for local dev
 #    build: ./frontend
     restart: always
-    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/frontend:${VERSION}
+    image: ghcr.io/nfdi4health/metadata-annotation-workbench/frontend:${VERSION}
     environment:
       - API_PASS=http://backend:5000
     ports:
@@ -18,7 +18,7 @@ services:
     # uncomment for local dev
 #    build: ./backend
     restart: always
-    image: gitlab.zbmed.de:5050/km/nfdi4health/annotation-workbench/backend:${VERSION}
+    image: ghcr.io/nfdi4health/metadata-annotation-workbench/backend:${VERSION}
     expose:
       - "5000"
     environment:
@@ -48,10 +48,8 @@ services:
       - db:/var/lib/postgresql/data
 
   prediction:
-    # uncomment for local dev
-#    build: ./prediction
     restart: always
-    image: gitlab.zbmed.de:5050/km/thesis/pierre-ba/backend:a7d3254ee488a236dade40ecedc646861aff9dbe
+    image: ghcr.io/nfdi4health/workbench-ai-model/backend:e57e38ff84b682be298d936ab7338f0fb9502825
     expose:
       - "5000"
 
