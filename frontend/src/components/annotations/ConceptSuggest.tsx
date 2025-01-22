@@ -11,7 +11,7 @@ import {
 } from "@elastic/eui";
 import React, { useEffect, useState } from "react";
 import { OLSConceptIF } from "../../api";
-import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
+import { MetadataWidget } from "@ts4nfdi/terminology-service-suite";
 import CustomEuiTable from './CustomEuiTable'
 import { useParams } from 'react-router-dom'
 

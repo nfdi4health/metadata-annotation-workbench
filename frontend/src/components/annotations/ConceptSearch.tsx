@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "react-query";
 import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiToolTip, } from "@elastic/eui";
 import React, { useState } from "react";
-import { AutocompleteWidget, MetadataWidget } from "@nfdi4health/semlookp-widgets";
+import { AutocompleteWidget, MetadataWidget } from "@ts4nfdi/terminology-service-suite";
 import { Question } from '../../pages/AnnotationPage'
 import { useParams } from 'react-router-dom'
 
@@ -34,13 +34,24 @@ export default (props: ConceptSearchProps) => {
     const [isMaelstromDomain, setIsMaelstromDomain] = useState<boolean>(false)
 
     const onInputChange = (e: any) => {
-        setSelectedEntity(
+        if (e && e[0]) {
+            setSelectedEntity(
             {
-                iri: e.iri,
-                label: e.label,
-                ontology_name: e.ontology_name,
-                entityType: e.type
+                iri: e[0].iri,
+                label: e[0].label,
+                ontology_name: e[0].ontology_name,
+                entityType: e[0].type
             });
+        } else {
+            setSelectedEntity(
+            {
+                iri: "",
+                label: "",
+                ontology_name: "",
+                entityType: ""
+            });
+        }
+
     };
 
     const {
@@ -60,7 +71,7 @@ export default (props: ConceptSearchProps) => {
     return (
         <div>
             <EuiFlexGroup>
-                <EuiFlexItem>
+                <EuiFlexItem style={{ maxWidth: "50%" }}>
                     <EuiFlexItem>
                         <EuiPanel>
                             <EuiToolTip
@@ -80,14 +91,29 @@ export default (props: ConceptSearchProps) => {
 
                             <EuiSpacer size="m"/>
 
+                            {ontologyList == "loinc" &&
                             <AutocompleteWidget
                                 api="https://semanticlookup.zbmed.de/ols/api/"
-                                parameter={`ontology=${ontologyList}`}
+                                parameter={`ontology=${ontologyList}&rows=1000&childrenOf=http://purl.bioontology.org/ontology/LNC/MTHU000998`}
                                 placeholder="Search"
                                 selectionChangedEvent={onInputChange}
                                 allowCustomTerms={false}
                                 hasShortSelectedLabel={true}
+                                singleSelection={true}
+                                singleSuggestionRow={true}
                             />
+                            }
+                            {ontologyList !== "loinc" &&
+                            <AutocompleteWidget
+                                api="https://semanticlookup.zbmed.de/ols/api/"
+                                parameter={`ontology=${ontologyList}&rows=1000`}
+                                placeholder="Search"
+                                selectionChangedEvent={onInputChange}
+                                allowCustomTerms={false}
+                                hasShortSelectedLabel={true}
+                                singleSelection={true}
+                                singleSuggestionRow={true}
+                            />}
                             <EuiSpacer/>
                             {isSuccess && selectedEntity.iri != "" &&
                                 <EuiButton
@@ -110,6 +136,7 @@ export default (props: ConceptSearchProps) => {
                                 <MetadataWidget
                                     iri={selectedEntity.iri}
                                     api={"https://semanticlookup.zbmed.de/ols/api/"}
+                                    // @ts-ignore
                                     entityType={selectedEntity.entityType == "class" ? "term" : selectedEntity.entityType}
                                     ontologyId={selectedEntity.ontology_name}
                                 />

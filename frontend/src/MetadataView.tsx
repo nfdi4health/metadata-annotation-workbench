@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MetadataWidget } from "@nfdi4health/semlookp-widgets";
+import { MetadataWidget } from "@ts4nfdi/terminology-service-suite";
 import { useParams } from 'react-router-dom'
 
 interface TermWidgetProps {
