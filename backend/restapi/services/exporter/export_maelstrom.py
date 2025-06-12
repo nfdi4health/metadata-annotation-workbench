@@ -64,18 +64,25 @@ def export_maelstrom_annotations_opal(df, instrument, questions, codes):
                         if response["_embedded"]["terms"][0]["ontology_name"] != "maelstrom":
                             return ("Not a maelstrom concept")
 
-                        if (response["_embedded"]["terms"][0]["synonyms"] is None):
-                            label = response["_embedded"]["terms"][0]["label"]
+                        term = response["_embedded"]["terms"][0]
+                        synonyms = response["_embedded"]["terms"][0]["synonyms"]
+                        
+                        if not synonyms:
+                            label = term["label"]
                         else:
-                            label = response["_embedded"]["terms"][0]["synonyms"][0].replace(' ', '_')
+                            label = synonyms[0].replace(' ', '_')
 
                         response_parent = requests.get(
                             "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
-                        if(response_parent["_embedded"]["terms"][0]["synonyms"] is None):
-                            label_parent = response_parent["_embedded"]["terms"][0]["label"].replace(' ', '_')
-                        else:
-                            label_parent = response_parent["_embedded"]["terms"][0]["synonyms"][0].replace(' ', '_')
 
+                        parent_term = response_parent["_embedded"]["terms"][0]
+                        synonyms = response["_embedded"]["terms"][0]["synonyms"]
+                        
+                        if not synonyms:
+                            label_parent = parent_term["label"].replace(' ', '_')
+                        else:
+                            label_parent = synonyms[0].replace(' ', '_')
+                            
                         maelstrom_prefix = "Mlstr_area::"
 
                         df.at[index, maelstrom_prefix + label_parent] = label
