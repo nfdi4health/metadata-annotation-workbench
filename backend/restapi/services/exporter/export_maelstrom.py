@@ -15,9 +15,9 @@ def get_codes_for_linkId(linkId, codes):
 def get_all_domains():
     # TODO code does only returns 14 of 18 domains
     # TODO add Maelstrom Additionals
-    url = "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms?size=500"
-    response = requests.get(url).json()
-    all_domains = ["Mlstr_area::" + domain["synonyms"][0].replace(' ', '_') for domain in response["_embedded"]["terms"]
+    # url = "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms?size=500"
+    # response = requests.get(url).json()
+    # all_domains = ["Mlstr_area::" + domain["synonyms"][0].replace(' ', '_') for domain in response["_embedded"]["terms"]
                    if (domain["synonyms"] is not None and domain["is_root"])]
     return [
         'Mlstr_area::Symptoms_signs',
