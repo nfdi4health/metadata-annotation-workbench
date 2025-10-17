@@ -76,7 +76,7 @@ def export_maelstrom_annotations_opal(df, instrument, questions, codes):
                             "https://semanticlookup.zbmed.de/ols/api/ontologies/maelstrom/terms/" + iri_encoded + "/parents").json()
 
                         parent_term = response_parent["_embedded"]["terms"][0]
-                        synonyms = response["_embedded"]["terms"][0]["synonyms"]
+                        synonyms = response_parent["_embedded"]["terms"][0]["synonyms"]
                         
                         if not synonyms:
                             label_parent = parent_term["label"].replace(' ', '_')
