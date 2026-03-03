@@ -30,7 +30,7 @@ jobs:
           helmv3 repo update
           helmv3 upgrade mda-prod  \
           --install \
-          --namespace='nfdi4health-mda'
+          --namespace='nfdi4health-mda' \
           --set-json='images.backend="ghcr.io/${{ github.repository }}/backend:${{ github.event.pull_request.head.sha || github.sha }}"' \
           --set-json='images.ui="ghcr.io/${{ github.repository }}/frontend:${{ github.event.pull_request.head.sha || github.sha }}"'  \
           --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:44a712a68697ce7d8dc544b7fd15cf0dd99e1d22"'  \
