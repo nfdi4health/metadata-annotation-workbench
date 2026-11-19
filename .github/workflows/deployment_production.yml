@@ -31,7 +31,7 @@ jobs:
           helmv3 upgrade mda-prod  \
           --install \
           --namespace='nfdi4health-mda' \
-          --set-json='images.backend="docker pull ghcr.io/nfdi4health/metadata-annotation-workbench/backend:769f1d6b717634df0c0705b2ebde33f097ca30cc"' \
+          --set-json='images.backend="ghcr.io/nfdi4health/metadata-annotation-workbench/backend:5017b0725601b0c70a71dbc4ecd9e18961b770a7"' \
           --set-json='images.ui="ghcr.io/nfdi4health/metadata-annotation-workbench/frontend:080be46da995e7ae1a2b1bc6d0f393f6c7a527d9"'  \
           --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:b279526858a6df4c2fe493d284008ae6a6bf642c"'  \
           --set-json='ingress.dns="mda.nfdi4health.de"'  \
