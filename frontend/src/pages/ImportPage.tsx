@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useMutation } from "react-query";
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -100,6 +101,39 @@ export default () => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
+
+      <div style={{ width: "50%", minWidth: 320, margin: "0 auto" }}>
+          <EuiCallOut
+            title="Notice: This service will be discontinued in 2027"
+            color="warning"
+          >
+            <p>
+              The Metadata Annotation Workbench will be taken offline in early 2027.
+              We currently have fewer resources available to maintain this
+              service, and can therefore no longer guarantee its long-term
+              operation.
+            </p>
+            <p>
+              <strong>Want to keep using the tool?</strong> The service is open
+              source and can be installed locally. Installation instructions and
+              source code are available on GitHub:{" "}
+              <a
+                href="https://github.com/nfdi4health/metadata-annotation-workbench"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                github.com/nfdi4health/metadata-annotation-workbench
+              </a>
+            </p>
+            <p>
+              <strong>Questions?</strong> Please contact us by email at{" "}
+              <a href="mailto:helpdesk@nfdi4health.de">
+                helpdesk@nfdi4health.de
+              </a>
+              .
+            </p>
+          </EuiCallOut>
+      </div>
 
       <EuiSpacer size="xl" />
 
