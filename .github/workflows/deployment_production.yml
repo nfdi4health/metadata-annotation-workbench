@@ -33,7 +33,7 @@ jobs:
           --namespace='nfdi4health-mda' \
           --set-json='images.backend="ghcr.io/nfdi4health/metadata-annotation-workbench/backend:5017b0725601b0c70a71dbc4ecd9e18961b770a7"' \
           --set-json='images.ui="ghcr.io/nfdi4health/metadata-annotation-workbench/frontend:080be46da995e7ae1a2b1bc6d0f393f6c7a527d9"'  \
-          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:8a81b689599f85446471f3569dab6645a66717c0"'  \
+          --set-json='images.prediction="ghcr.io/nfdi4health/maelstrom-classification/backend:77cd72f127614f6f68aa91278224b48b2a7bded4"'  \
           --set-json='ingress.dns="mda.nfdi4health.de"'  \
           --set-json='ingress.enableSSL="true"'  \
           --set-json='ingress.certIssuer="letsencrypt-prod"'  \
